@@ -5,11 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal">
+
+    <TextView
+        android:text="Nerd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView2"
+        android:layout_weight="0.03" />
+
     <EditText android:id="@+id/edit_message"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="@string/edit_message"
         android:layout_weight="1"     />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
