@@ -1,8 +1,5 @@
 package hamblin.project1;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -40,8 +37,6 @@ public class MainActivity extends AppCompatActivity {
         final RotateAnimation rotateAnimation = new RotateAnimation(0, 1440, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         rotateAnimation.setDuration(500);
 
-//        for(final ImageView f : flowers) {
-//            f.setImageResource(R.drawable.tmp);
         rotateAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -96,32 +91,6 @@ public class MainActivity extends AppCompatActivity {
         flower1.startAnimation(rotateAnimation);
         flower2.startAnimation(rotateAnimation);
         flower3.startAnimation(rotateAnimation);
-//        }
-
-
-//        for(ImageView f : flowers) {
-//            Random r = new Random();
-//            switch (r.nextInt(3) + 1) {
-//                case 1:
-//                    f.setImageResource(R.drawable.f1);
-//                    flower_count[0]++;
-//                    break;
-//                case 2:
-//                    f.setImageResource(R.drawable.f2);
-//                    flower_count[1]++;
-//                    break;
-//                case 3:
-//                    f.setImageResource(R.drawable.f3);
-//                    flower_count[2]++;
-//                    break;
-//            }
-//        }
-
-        /* TODO: Figure out a way to delay code until animation is complete */
-
-
-
-        /* TODO: Keep data when changing phone orientation */
     }
 
     public void resetButton(View view) {

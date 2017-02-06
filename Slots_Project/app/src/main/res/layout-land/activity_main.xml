@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@drawable/flowers3"
+    android:scaleType="fitXY"
+    tools:context="hamblin.project1.MainActivity">
+
+    <ImageView
+        android:layout_width="30pt"
+        android:layout_height="30pt"
+        app:srcCompat="@drawable/dol"
+        android:id="@+id/dollar_image"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <ImageView
+        android:layout_width="30pt"
+        android:layout_height="30pt"
+        app:srcCompat="@drawable/reset1"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/reset_image"
+        android:onClick="resetButton"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="7pt"
+        android:textStyle="bold"
+        android:text="@string/match_2"
+        android:id="@+id/match_2"
+        android:layout_below="@+id/match_0"
+        android:layout_alignLeft="@+id/match_0"
+        android:layout_alignStart="@+id/match_0" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="7pt"
+        android:textStyle="bold"
+        android:text="@string/match_3"
+        android:id="@+id/match_3"
+        android:layout_below="@+id/match_2"
+        android:layout_alignLeft="@+id/match_0"
+        android:layout_alignStart="@+id/match_0" />
+
+    <ImageView
+        android:layout_width="45pt"
+        android:layout_height="45pt"
+        app:srcCompat="@drawable/tmp"
+        android:id="@+id/flower3"
+        android:layout_alignTop="@+id/flower2"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="15pt"
+        android:textSize="12pt"
+        android:textStyle="bold"
+        android:textColor="@color/coin_color"
+        android:text="@string/coin_amount"
+        android:id="@+id/coin_amount"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/dollar_image"
+        android:layout_marginBottom="7.5pt"
+        android:layout_marginLeft="5pt"/>
+
+    <ImageView
+        android:layout_width="45pt"
+        android:layout_height="45pt"
+        app:srcCompat="@drawable/tmp"
+        android:id="@+id/flower2"
+        android:layout_alignTop="@+id/flower1"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="40pt"
+        android:layout_height="40pt"
+        app:srcCompat="@drawable/go"
+        android:id="@+id/go_image"
+        android:onClick="goButton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/flower2"
+        android:layout_alignStart="@+id/flower2" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12pt"
+        android:textStyle="bold"
+        android:text="@string/play_cost"
+        android:id="@+id/dollar_a_play"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/dollar_image"
+        android:layout_toEndOf="@+id/dollar_image" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="7pt"
+        android:textStyle="bold"
+        android:text="@string/match_0"
+        android:id="@+id/match_0"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/flower3"
+        android:layout_toStartOf="@+id/flower3" />
+
+    <ImageView
+        android:layout_width="45pt"
+        android:layout_height="45pt"
+        app:srcCompat="@drawable/tmp"
+        android:id="@+id/flower1"
+        android:layout_below="@+id/match_3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+</RelativeLayout>

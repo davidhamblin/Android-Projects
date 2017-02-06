@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Project1</string>
+    <string name="app_name">Hamblin_Project1</string>
     <string name="play_cost">$1 a Play</string>
     <string name="match_0">Match 0 - lose $1</string>
     <string name="match_2">Match 2 - win $2</string>
