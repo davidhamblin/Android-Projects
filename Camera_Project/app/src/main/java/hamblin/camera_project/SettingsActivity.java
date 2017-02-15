@@ -3,8 +3,11 @@ package hamblin.camera_project;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 public class SettingsActivity extends Activity {
 	@Override
@@ -19,6 +22,17 @@ public class SettingsActivity extends Activity {
 		mFragmentTransaction.replace(android.R.id.content, mPrefsFragment);
 		mFragmentTransaction.commit();	    
 	  }
+
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.share_subject:
+				Toast.makeText(this, "NEW SUBJECT", Toast.LENGTH_SHORT).show();
+				break;
+			default:
+				break;
+		}
+		return true;
+	}
 	
 	public static class PrefsFragment extends PreferenceFragment {
 

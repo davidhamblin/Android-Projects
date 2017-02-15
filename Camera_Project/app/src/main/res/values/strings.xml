@@ -35,5 +35,10 @@
     <string name="summary_child_preference">This is visually a child</string>
     <string name="sharemessage">Something to cherish, enjoy!</string>
     <string name="shareTitle">An image for you</string>
+    <string name="share_summary">This is the subject of the message you would like to share</string>
+    <string name="share_subject">Share Subject</string>
+    <string name="share_text">Share Text</string>
+    <string name="share_text_summary">This is the text you would like to share</string>
+    <string name="share_options">Share Options</string>
 
 </resources>
