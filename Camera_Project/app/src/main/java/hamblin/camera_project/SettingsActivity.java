@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 public class SettingsActivity extends Activity {

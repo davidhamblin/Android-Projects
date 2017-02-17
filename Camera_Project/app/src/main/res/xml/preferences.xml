@@ -1,18 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/share_options">
-    <EditTextPreference android:title="@string/share_subject"
-        android:key="subject"
-        android:summary="@string/share_summary"
-        android:id="@+id/share_subject" />
-    <EditTextPreference android:title="@string/share_text"
-        android:key="text"
-        android:summary="@string/share_text_summary"
-        android:id="@+id/share_text" />
+        <EditTextPreference android:title="@string/share_subject"
+            android:key="subject"
+            android:summary="@string/share_summary"
+            android:id="@+id/share_subject" />
+        <EditTextPreference android:title="@string/share_text"
+            android:key="text"
+            android:summary="@string/share_text_summary"
+            android:id="@+id/share_text" />
     </PreferenceCategory>
-    <!--<SeekBarPreference android:title="Sketchiness"-->
-        <!--android:defaultValue="false"-->
-        <!--android:summary="Longwinded explanation goes here"-->
-        <!--android:key="applicationUpdates" />-->
+
+    <PreferenceCategory android:title="Rendering Options">
+        <PreferenceScreen android:title="Customize Image"
+            android:key="render"
+            android:summary="Customize the level of sketchiness and color saturation"
+            android:id="@+id/render_options"
+            xmlns:robobunny="http://robobunny.com">
+            <Preference android:title="Sketchiness"
+                android:key="sketchiness_desc"
+                android:summary="@string/sketchiness_desc"
+                android:selectable="false" />
+            <hamblin.camera_project.SeekBarPreference
+                android:id="@+id/bw_bar"
+                android:defaultValue="50"
+                android:key="bw_value"
+                android:max="255"
+                robobunny:min="0"
+                robobunny:unitsLeft=""
+                robobunny:unitsRight="/255" />
+
+            <Preference android:title="Saturation"
+                android:key="sketchiness_desc"
+                android:summary="@string/saturation_desc"
+                android:selectable="false" />
+            <hamblin.camera_project.SeekBarPreference
+                android:id="@+id/saturation_bar"
+                android:defaultValue="50"
+                android:key="saturation_value"
+                android:max="255"
+                robobunny:min="0"
+                robobunny:unitsLeft=""
+                robobunny:unitsRight="/255" />
+        </PreferenceScreen>
+    </PreferenceCategory>
     
 </PreferenceScreen>

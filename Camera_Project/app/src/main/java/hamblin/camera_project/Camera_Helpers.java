@@ -18,7 +18,7 @@ import java.io.OutputStream;
  */
 public class Camera_Helpers {
 	static  final String DEBUG_TAG ="Camera_Helpers";
-    private static final float ROTATE_90_DEGREES = 90;
+    private static final float ROTATE_90_DEGREES = -90;
     private static final int FIRST_PIX_X = 0;
     private static final int FIRST_PIX_Y = 0;
 	private static final String TAG = "Camera_Helpers";
