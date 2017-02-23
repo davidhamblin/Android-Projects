@@ -14,7 +14,7 @@
     <PreferenceCategory android:title="Rendering Options">
         <PreferenceScreen android:title="Customize Image"
             android:key="render"
-            android:summary="Customize the level of sketchiness and color saturation"
+            android:summary="@string/customize_summary"
             android:id="@+id/render_options"
             xmlns:robobunny="http://robobunny.com">
             <Preference android:title="Sketchiness"

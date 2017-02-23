@@ -42,5 +42,6 @@
     <string name="share_options">Share Options</string>
     <string name="sketchiness_desc">Set BW threshold, higher numbers correspond to less detail and a whiter image</string>
     <string name="saturation_desc">Set color saturation, higher numbers correspond to more colorful images</string>
+    <string name="customize_summary">Customize the level of sketchiness and color saturation</string>
 
 </resources>

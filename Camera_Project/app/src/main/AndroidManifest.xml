@@ -17,10 +17,6 @@
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="portrait">
-            <!-- ensures that the app is always in portrait even when phone rotated
-      	 		consider what this means for phones with a slide out keyboard, they rotate the phone slide out the keyboard and
-      	 		discover, to their horror, that the app does not rotate.  So please dont ever do this in another app
-            -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

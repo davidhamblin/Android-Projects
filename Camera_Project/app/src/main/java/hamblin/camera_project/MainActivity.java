@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -40,15 +41,31 @@ public class MainActivity extends AppCompatActivity  {
     private int screenHeight, screenWidth;
     private Bitmap bmpImage;
     private String file_path;
+    private int cameraAngle = 90;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        DisplayMetrics metrics = this.getResources().getDisplayMetrics();
+        screenHeight = metrics.heightPixels;
+        screenWidth = metrics.widthPixels;
+
         backgroundImage = (ImageView) findViewById(R.id.taken_picture);
         file_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath() + Constants.full_file;
-        picUri = Uri.fromFile(new File(file_path));
+        File loaded_file = new File(file_path);
+        picUri = Uri.fromFile(loaded_file);
+
+        // If there is a picture saved, load it in when opening the app
+        if(loaded_file.exists()) {
+            bmpImage = Camera_Helpers.loadAndScaleImage(picUri.getPath(), screenHeight, screenWidth, cameraAngle);
+            setBackground(false);
+        }
+        else {
+            Log.e(Constants.IO_TAG, "File not loaded");
+            setBackground(true);
+        }
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle("");
@@ -59,11 +76,20 @@ public class MainActivity extends AppCompatActivity  {
         String[] permissionList = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         ActivityCompat.requestPermissions(this, permissionList, Constants.CAMERA_REQUEST);
 
-        DisplayMetrics metrics = this.getResources().getDisplayMetrics();
-        screenHeight = metrics.heightPixels;
-        screenWidth = metrics.widthPixels;
-
         reloadBitmap();
+    }
+
+    /**
+     * A method to set the background image of the main view.
+     * @param def True if loading the default image, false if loading a taken picture
+     */
+    private void setBackground(boolean def) {
+        if(def)
+            backgroundImage.setImageResource(R.drawable.borat);
+        else
+            backgroundImage.setImageBitmap(bmpImage);
+        backgroundImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
     }
 
     /**
@@ -162,9 +188,7 @@ public class MainActivity extends AppCompatActivity  {
      * Also, the storage for the taken pictures are cleared.
      */
     public void resetBackground() {
-        backgroundImage.setImageResource(R.drawable.borat);
-        backgroundImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
+        setBackground(true);
         reloadBitmap();
 
         // Once the image is reset, delete the file.
@@ -185,11 +209,29 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == Constants.TAKE_PICTURE && resultCode == RESULT_OK) {
-            bmpImage = Camera_Helpers.loadAndScaleImage(picUri.getPath(), screenHeight, screenWidth);
+            // Depending on the picture's orientation after it is taken, determine rotation angle
+            // Required when switching between the front and back camera, as the images are flipped
+            try {
+                ExifInterface ei = new ExifInterface(picUri.getPath());
+                int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                switch (orientation) {
+                    case ExifInterface.ORIENTATION_ROTATE_90:
+                        cameraAngle = 90;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_180:
+                        cameraAngle = 180;
+                        break;
+                    case ExifInterface.ORIENTATION_ROTATE_270:
+                        cameraAngle = 270;
+                        break;
+                    default:
+                        break;
+                }
+            } catch(IOException e) { Log.e(Constants.IO_TAG, "File not found"); }
+            Log.d(Constants.IO_TAG, "Picture at angle: " + String.valueOf(cameraAngle));
+            bmpImage = Camera_Helpers.loadAndScaleImage(picUri.getPath(), screenHeight, screenWidth, cameraAngle);
             Camera_Helpers.saveProcessedImage(bmpImage, picUri.getPath());
-            backgroundImage.setImageBitmap(bmpImage);
-            backgroundImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
+            setBackground(false);
         }
         else if(resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Canceled Picture", Toast.LENGTH_SHORT).show();
