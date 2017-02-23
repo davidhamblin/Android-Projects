@@ -4,18 +4,14 @@ package hamblin.camera_project;
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.EditTextPreference;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -23,9 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.library.bitmap_utilities.BitMap_Helpers;
@@ -40,7 +34,6 @@ public class MainActivity extends AppCompatActivity  {
     private Uri picUri;
     private int screenHeight, screenWidth;
     private Bitmap bmpImage;
-    private String file_path;
     private int cameraAngle = 90;
 
     @Override
@@ -53,7 +46,7 @@ public class MainActivity extends AppCompatActivity  {
         screenWidth = metrics.widthPixels;
 
         backgroundImage = (ImageView) findViewById(R.id.taken_picture);
-        file_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath() + Constants.full_file;
+        String file_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath() + Constants.full_file;
         File loaded_file = new File(file_path);
         picUri = Uri.fromFile(loaded_file);
 
@@ -67,6 +60,7 @@ public class MainActivity extends AppCompatActivity  {
             setBackground(true);
         }
 
+        // Create the toolbar and remove the project name from the bar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle("");
         setSupportActionBar(myToolbar);
@@ -74,9 +68,7 @@ public class MainActivity extends AppCompatActivity  {
         // Ask for permissions once the app first launches, so there are no crashes later
         // Necessary in Android 6.0 and above, with runtime permission checking :(
         String[] permissionList = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        ActivityCompat.requestPermissions(this, permissionList, Constants.CAMERA_REQUEST);
-
-        reloadBitmap();
+        ActivityCompat.requestPermissions(this, permissionList, Constants.PERMISSION_REQUEST);
     }
 
     /**
@@ -90,6 +82,7 @@ public class MainActivity extends AppCompatActivity  {
             backgroundImage.setImageBitmap(bmpImage);
         backgroundImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
         backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
+        reloadBitmap();
     }
 
     /**
@@ -139,7 +132,6 @@ public class MainActivity extends AppCompatActivity  {
      * Convert the current ImageView to a colorized picture using bitmap_utilities
      */
     private void colorizePicture() {
-//        reloadBitmap();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         int colorThreshold = preferences.getInt("saturation_value", 50);
         int bwThreshold = preferences.getInt("bw_value", 50);
@@ -154,7 +146,6 @@ public class MainActivity extends AppCompatActivity  {
      * Convert the current ImageView to black and white using bitmap_utilities
      */
     private void bwPicture() {
-//        reloadBitmap();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         int threshold = preferences.getInt("bw_value", 50);
         Bitmap bwImage = BitMap_Helpers.thresholdBmp(bmpImage, threshold);
@@ -173,8 +164,10 @@ public class MainActivity extends AppCompatActivity  {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String subject = preferences.getString("subject", "");
         String text = preferences.getString("text", "");
-//        File newImage = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath() + Constants.full_file);
-//        Uri imageUri = Uri.fromFile(newImage);
+
+        reloadBitmap();
+        setBackground(false);
+        Camera_Helpers.saveProcessedImage(bmpImage, picUri.getPath());
 
         sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, subject);
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, text);
@@ -188,8 +181,8 @@ public class MainActivity extends AppCompatActivity  {
      * Also, the storage for the taken pictures are cleared.
      */
     public void resetBackground() {
+        // Change the image back to Borat
         setBackground(true);
-        reloadBitmap();
 
         // Once the image is reset, delete the file.
         try {
@@ -233,7 +226,7 @@ public class MainActivity extends AppCompatActivity  {
             Camera_Helpers.saveProcessedImage(bmpImage, picUri.getPath());
             setBackground(false);
         }
-        else if(resultCode == RESULT_CANCELED) {
+        else if(requestCode == Constants.TAKE_PICTURE && resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Canceled Picture", Toast.LENGTH_SHORT).show();
         }
     }
