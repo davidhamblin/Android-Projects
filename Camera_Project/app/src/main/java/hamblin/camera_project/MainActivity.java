@@ -41,10 +41,12 @@ public class MainActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Retrieve the screen dimensions for scaling images
         DisplayMetrics metrics = this.getResources().getDisplayMetrics();
         screenHeight = metrics.heightPixels;
         screenWidth = metrics.widthPixels;
 
+        // Set the initial URI path of a taken picture.
         backgroundImage = (ImageView) findViewById(R.id.taken_picture);
         String file_path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath() + Constants.full_file;
         File loaded_file = new File(file_path);
