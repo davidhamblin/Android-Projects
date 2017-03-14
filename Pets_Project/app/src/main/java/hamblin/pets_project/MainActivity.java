@@ -35,13 +35,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    List<Pet> listPets;
+    volatile List<Pet> listPets;
     Spinner spinner;
     SharedPreferences myPreference;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // TODO -- TELL USER SERVER STATUS CODE, NOT JUST FILENOTFOUNDEXCEPTION
+        // TODO -- TELL USER SERVER STATUS CODE, NOT JUST FILENOTFOUNDEXCEPTION. Use HttpURLConnection instead of URL to get codes.
         checkForNetworkConnectivity();
 
         // Retrieve the screen dimensions for scaling images
@@ -86,8 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkForNetworkConnectivity() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if(cm.getActiveNetworkInfo() == null || !cm.getActiveNetworkInfo().isConnectedOrConnecting()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Network Error")
@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Creates a Spinner in the title bar to select an ImageView to display
      */
-    private void setupSpinner(List<Pet> pets) {
+    private synchronized void setupSpinner(List<Pet> pets) {
         List<String> petNames = new ArrayList<>();
         for(Pet p : pets) {
             petNames.add(p.name);
@@ -208,9 +208,13 @@ public class MainActivity extends AppCompatActivity {
             address = params[0] + "pets.json";
             Log.d("IO", address);
             try {
+                // Use HttpURLConnection instead of URL. Check lectures.
                 URL url = new URL(address);
                 URLConnection connection = url.openConnection();
-                connection.connect();
+                HttpURLConnection HttpURL = (HttpURLConnection) connection;
+                HttpURL.connect();
+                Log.d("IO", "" + HttpURL.getResponseCode());
+//                connection.connect();
                 InputStream input = new BufferedInputStream(url.openStream(), 8192);
                 JsonReader reader = new JsonReader(new InputStreamReader(input, "UTF-8"));
 //                reader.setLenient(true);
