@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     tools:context="hamblin.pets_project.MainActivity">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:id="@+id/background_image" />
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
@@ -16,12 +22,7 @@
             android:id="@+id/spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingRight="20sp" />
+            android:paddingRight="20sp"
+            android:visibility="invisible" />
     </android.support.v7.widget.Toolbar>
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="fitXY" />
-
 </RelativeLayout>

@@ -3,6 +3,7 @@
     <string name="action_settings">Settings</string>
     <string name="list_summary">Select which site to get JSON data from</string>
     <string name="list_title">Info</string>
+    <string name="action_about">About</string>
     <string-array name="JSON_URL_NAME">
         <item>CNU - Defender</item>
         <item>Pair - Teton Software - Pets</item>
