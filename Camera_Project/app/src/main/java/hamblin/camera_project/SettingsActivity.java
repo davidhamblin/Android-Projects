@@ -23,17 +23,6 @@ public class SettingsActivity extends Activity {
 		mFragmentTransaction.replace(android.R.id.content, mPrefsFragment);
 		mFragmentTransaction.commit();	    
 	  }
-
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.share_subject:
-				Toast.makeText(this, "NEW SUBJECT", Toast.LENGTH_SHORT).show();
-				break;
-			default:
-				break;
-		}
-		return true;
-	}
 	
 	public static class PrefsFragment extends PreferenceFragment {
 

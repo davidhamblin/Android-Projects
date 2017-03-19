@@ -42,21 +42,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    volatile List<Pet> listPets;
-    Spinner spinner;
     SharedPreferences myPreference;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
     String petAddress;
-    ImageView backgroundImage;
     int screenHeight, screenWidth;
+
+    // Needs to be thread safe
+    volatile ImageView backgroundImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // TODO -- TELL USER SERVER STATUS CODE, NOT JUST FILENOTFOUNDEXCEPTION. Use HttpURLConnection instead of URL to get codes.
-        checkForNetworkConnectivity();
+        boolean connected = checkForNetworkConnectivity();
 
         // Retrieve the screen dimensions for scaling images
         DisplayMetrics metrics = this.getResources().getDisplayMetrics();
@@ -79,14 +78,20 @@ public class MainActivity extends AppCompatActivity {
         };
 
         myPreference.registerOnSharedPreferenceChangeListener(listener);
-        connectAndLoadList(myPreference.getString("json_list", ""));
+
+        if(connected)
+            connectAndLoadList(myPreference.getString("json_list", ""));
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle("");
         setSupportActionBar(myToolbar);
     }
 
-    private void checkForNetworkConnectivity() {
+    /**
+     * Checks if the device is connected to a network, either data or WiFi
+     * @return True if connected, false otherwise
+     */
+    private boolean checkForNetworkConnectivity() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if(cm.getActiveNetworkInfo() == null || !cm.getActiveNetworkInfo().isConnectedOrConnecting()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -94,7 +99,9 @@ public class MainActivity extends AppCompatActivity {
                     .setMessage("No network connection detected")
                     .setPositiveButton("OK", null)
                     .show();
+            return false;
         }
+        return true;
     }
 
     /**
@@ -104,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         // No address value attached to key
         if(address.isEmpty()) {
             Log.e("connectAndLoad", "No address listed");
+            Toast.makeText(this, "No address attached to the selected list item", Toast.LENGTH_LONG).show();
             return;
         }
         petAddress = address;
@@ -112,6 +120,11 @@ public class MainActivity extends AppCompatActivity {
         task.execute(address);
     }
 
+    /**
+     * Method to set the activity's menu to the custom menu main.xml
+     * @param menu The menu of the activity
+     * @return true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -119,6 +132,11 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Listener for selection of choices in the overflow menu
+     * @param item An option within the overflow menu
+     * @return true
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -145,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-//                Toast.makeText(MainActivity.this, "Thanks for reading my About!", Toast.LENGTH_SHORT).show();
                 Snackbar.make(findViewById(R.id.activity_main), "Thanks for reading my About!", Snackbar.LENGTH_LONG)
                         .setAction("CLOSE", new View.OnClickListener() {
                             @Override
@@ -162,63 +179,76 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Creates a Spinner in the title bar to select an ImageView to display
+     * Removes the Spinner and background image if the parameter is null
      */
     private synchronized void setupSpinner(List<Pet> pets) {
-        List<String> petNames = new ArrayList<>();
-        for(Pet p : pets) {
-            petNames.add(p.name);
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item_simple, petNames);
-        spinner = (Spinner) findViewById(R.id.spinner);
-        spinner.setVisibility(View.VISIBLE);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            static final int SELECTED_ITEM = 0;
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(parent.getChildAt(SELECTED_ITEM) != null) {
-                    ((TextView) parent.getChildAt(SELECTED_ITEM)).setTextColor(Color.WHITE);
-                    Toast.makeText(MainActivity.this, (String) parent.getItemAtPosition(position), Toast.LENGTH_SHORT).show();
-                    changeBackground(position);
-                }
+        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        if(pets != null) {
+            List<String> petNames = new ArrayList<>();
+            for (Pet p : pets) {
+                petNames.add(p.name);
             }
+            final List<Pet> finalPets = pets;
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item_simple, petNames);
+            spinner.setVisibility(View.VISIBLE);
+            spinner.setAdapter(adapter);
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                static final int SELECTED_ITEM = 0;
+
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (parent.getChildAt(SELECTED_ITEM) != null) {
+                        ((TextView) parent.getChildAt(SELECTED_ITEM)).setTextColor(Color.WHITE);
+                        Toast.makeText(MainActivity.this, (String) parent.getItemAtPosition(position), Toast.LENGTH_SHORT).show();
+                        changeBackground(position, finalPets);
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {}
+            });
+        }
+        // If the List object is null, no website was loaded and remove the spinner/background
+        else {
+            spinner.setVisibility(View.INVISIBLE);
+            backgroundImage.setImageResource(0);
+        }
     }
 
     /**
      * Method to change the background image to the one selected by the Spinner
      */
-    private void changeBackground(int index) {
-        String fileToGrab = listPets.get(index).file;
+    private synchronized void changeBackground(int index, List<Pet> pets) {
+        String fileToGrab = pets.get(index).file;
         DownloadFile task = new DownloadFile();
         task.execute(petAddress + fileToGrab);
     }
 
     private class DownloadList extends AsyncTask<String, Void, List<Pet>> {
         String address;
-        List<Pet> pets;
+        HttpURLConnection HttpURL;
 
+        /**
+         * The method to be executed on the AsyncTask thread, making a connection to the address and downloading the list of pets
+         * @param params The address a connection is made to
+         * @return The list of pets gathered from the address
+         */
         @Override
         public List<Pet> doInBackground(String... params) {
             address = params[0] + "pets.json";
             Log.d("IO", address);
             try {
-                // Use HttpURLConnection instead of URL. Check lectures.
                 URL url = new URL(address);
                 URLConnection connection = url.openConnection();
-                HttpURLConnection HttpURL = (HttpURLConnection) connection;
+                HttpURL = (HttpURLConnection) connection;
                 HttpURL.connect();
                 Log.d("IO", "" + HttpURL.getResponseCode());
-//                connection.connect();
                 InputStream input = new BufferedInputStream(url.openStream(), 8192);
                 JsonReader reader = new JsonReader(new InputStreamReader(input, "UTF-8"));
-//                reader.setLenient(true);
-                pets = new ArrayList<>();
+                List<Pet> pets = new ArrayList<>();
+
+                // Begin iterating over the JSON object
                 reader.beginObject();
                 while(reader.hasNext()) {
                     if(reader.nextName().equals("pets")) {
@@ -235,12 +265,18 @@ public class MainActivity extends AppCompatActivity {
                 return pets;
             } catch (Exception e) {
                 Log.e("IO", "Error: " + e);
-                if(e instanceof FileNotFoundException)
+                if(e instanceof FileNotFoundException || e instanceof IOException)
                     this.cancel(true);
             }
             return null;
         }
 
+        /**
+         * Parses the given JsonReader by object, looking for the specific layout of a pets object
+         * @param reader The reader to be parsed by JSONObject
+         * @return A pet with a name and file extracted from the reader
+         * @throws IOException The reader may not be able to access a new object if formatted incorrectly
+         */
         private Pet readPet(JsonReader reader) throws IOException {
             String name = null;
             String file = null;
@@ -262,6 +298,10 @@ public class MainActivity extends AppCompatActivity {
             return new Pet(name, file);
         }
 
+        /**
+         * Called if a successful connection is made to the address
+         * @param pets List of pets gathered from the address, or null if there is something wrong with the file
+         */
         @Override
         public void onPostExecute(List<Pet> pets) {
             // If a file was found, but not in the proper JSON format
@@ -272,20 +312,33 @@ public class MainActivity extends AppCompatActivity {
                 for (Pet p : pets) {
                     Log.d("onPostExecute", "Name: " + p.name + ", File: " + p.file);
                 }
-                listPets = pets;
-                setupSpinner(listPets);
             }
+            setupSpinner(pets);
         }
 
+        /**
+         * Method called when the thread is cancelled due to a problem with connecting to the given address
+         */
         @Override
         protected void onCancelled() {
-            // Only called with a FileNotFoundException, telling us that there was a 404 error
-            Toast.makeText(MainActivity.this, "ERROR when connecting to:\n" + address + "\nServer returned 404", Toast.LENGTH_LONG).show();
+            // Tell the user what response code was returned from the system, or a generic error message if there is an exception
+            try {
+                Toast.makeText(MainActivity.this, "ERROR when connecting to:\n" + address + "\nServer returned " + HttpURL.getResponseCode(), Toast.LENGTH_LONG).show();
+            }
+            catch(Exception e) {
+                Toast.makeText(MainActivity.this, "ERROR when connecting to:\n" + address + "\nServer returned an error", Toast.LENGTH_LONG).show();
+            }
             super.onCancelled();
+            setupSpinner(null);
         }
     }
 
     private class DownloadFile extends AsyncTask<String, Void, Bitmap> {
+        /**
+         * The method to be executed on the AsyncTask thread, making a connection to the address and downloading the specific pet
+         * @param params The address a connection is made to
+         * @return A Bitmap of the image from the address
+         */
         @Override
         protected Bitmap doInBackground(String... params) {
             try {
@@ -301,10 +354,20 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
+        /**
+         * Sets the background image of the MainActivity to the loaded image
+         * @param bitmap The bitmap to set to the background image
+         */
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            backgroundImage.setImageBitmap(Bitmap.createScaledBitmap(bitmap, screenWidth, screenHeight, false));
-            backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
+            // If there was an error in loading the file
+            if(bitmap == null) {
+                Toast.makeText(MainActivity.this, "Could not load image file", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                backgroundImage.setImageBitmap(Bitmap.createScaledBitmap(bitmap, screenWidth, screenHeight, false));
+                backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
+            }
         }
     }
 
