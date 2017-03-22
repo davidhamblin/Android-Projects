@@ -1,4 +1,4 @@
-package hamblin.graduateproject;
+package hamblin.graduate_project;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("hamblin.graduateproject", appContext.getPackageName());
+        assertEquals("hamblin.graduate_project", appContext.getPackageName());
     }
 }

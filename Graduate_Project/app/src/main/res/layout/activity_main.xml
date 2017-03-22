@@ -8,10 +8,32 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="hamblin.graduateproject.MainActivity">
+    tools:context="hamblin.graduate_project.MainActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:text="@string/default_text"
+        android:textSize="22sp"
+        android:id="@+id/edit_text" />
+
+    <Button
+        android:id="@+id/push_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/edit_text"
+        android:layout_marginTop="10dp"
+        android:text="@string/push_string" />
+
+    <Button
+        android:id="@+id/pull_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_text"
+        android:layout_toEndOf="@+id/push_button"
+        android:layout_toRightOf="@+id/push_button"
+        android:layout_marginTop="10dp"
+        android:text="@string/pull_string" />
 </RelativeLayout>

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Graduate Project</string>
+    <string name="action_settings">Settings</string>
+    <string name="about_dialog">About</string>
+    <string name="push_string">Push</string>
+    <string name="pull_string">Pull</string>
+    <string name="default_text">Online Text Goes Here</string>
 </resources>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Pets_Project</string>
+    <string name="app_name">Hamblin Project 3</string>
     <string name="action_settings">Settings</string>
     <string name="list_summary">Select which site to get JSON data from</string>
     <string name="list_title">Info</string>

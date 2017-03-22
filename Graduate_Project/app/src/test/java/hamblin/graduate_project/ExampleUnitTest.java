@@ -1,4 +1,4 @@
-package hamblin.graduateproject;
+package hamblin.graduate_project;
 
 import org.junit.Test;
 
