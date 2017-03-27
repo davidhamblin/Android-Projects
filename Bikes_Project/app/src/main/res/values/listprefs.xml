@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string-array name="JSON_URL_NAME">
+ <item>CNU - Defender</item>
+ <item>@string/tetonNAME</item>
+ </string-array>
+<string-array name="JSON_URL">
+ <item>http://www.pcs.cnu.edu/~kperkins/bikes/</item>
+ <item>@string/tetonURL</item>
+ </string-array>
+</resources>

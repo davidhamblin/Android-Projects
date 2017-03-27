@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- the following will appear in the action bar foe API 3.0 and above -->
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/action_settings1"
+        app:showAsAction="never"
+        android:title="Settings"></item>
+
+</menu>

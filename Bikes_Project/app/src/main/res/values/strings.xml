@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Bikes_Project</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="tetonURL">http://www.tetonsoftware.com/bikes/</string>
+    <string name="tetonNAME">Pair - Teton Software</string>
+    
+
+</resources>
