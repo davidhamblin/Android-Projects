@@ -6,6 +6,10 @@
     <string name="menu_settings">Settings</string>
     <string name="tetonURL">http://www.tetonsoftware.com/bikes/</string>
     <string name="tetonNAME">Pair - Teton Software</string>
-    
+    <string name="list_title">JSON Servers</string>
+    <string name="list_summary">List of JSON servers to download contents from</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_about">About</string>
+
 
 </resources>

@@ -72,9 +72,10 @@ public class Activity_ListView extends AppCompatActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-
-		default:
-			break;
+			case 0:
+				break;
+			default:
+				break;
 		}
 		return true;
 	}

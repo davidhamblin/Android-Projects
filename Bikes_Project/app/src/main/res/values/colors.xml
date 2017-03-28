@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+ <color name="transparent">#60000000</color>
+ <color name="invisible">#00000000</color>
  <color name="White">#FFFFFF</color>
  <color name="Ivory">#FFFFF0</color>
  <color name="LightYellow">#FFFFE0</color>
@@ -91,7 +93,6 @@
  <color name="DarkMagenta">#8B008B</color>
  <color name="DarkRed">#8B0000</color>
  <color name="BlueViolet">#8A2BE2</color>
-
  <color name="LightSkyBlue">#87CEFA</color>
  <color name="SkyBlue">#87CEEB</color>
  <color name="Gray">#808080</color>

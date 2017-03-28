@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference android:title="@string/list_title"
+        android:defaultValue="2"
+        android:summary="@string/list_summary"
+        android:entries="@array/JSON_URL_NAME"
+        android:entryValues="@array/JSON_URL"
+        android:key="json_list"
+        android:id="@+id/json_list" />
+
+
+</PreferenceScreen>
