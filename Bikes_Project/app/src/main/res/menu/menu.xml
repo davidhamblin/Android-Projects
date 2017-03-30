@@ -2,6 +2,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="3"
+        android:title="@string/action_refresh"
+        android:icon="@android:drawable/ic_popup_sync"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="5"
         android:title="@string/action_settings"
