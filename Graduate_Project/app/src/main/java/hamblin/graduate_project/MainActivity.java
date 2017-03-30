@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.net.ConnectivityManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -15,7 +16,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveApi;
+import com.google.android.gms.drive.MetadataChangeSet;
+
 public class MainActivity extends AppCompatActivity {
+
+    GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +37,35 @@ public class MainActivity extends AppCompatActivity {
         // Necessary in Android 6.0 and above, with runtime permission checking :(
         String[] permissionList = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         ActivityCompat.requestPermissions(this, permissionList, 123);
+
+//        GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(this, DriveScopes.DRIVE);
+//        credential.setSelectedAccountName(accountName);
+//        Drive service = new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(), credential).build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Drive.API)
+                .addScope(Drive.SCOPE_FILE)
+                .build();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+//    @Override
+//    public void onConnectionFailed(ConnectionResult connectionResult) {
+//        if (connectionResult.hasResolution()) {
+//            try {
+//                connectionResult.startResolutionForResult(this, 528);
+//            } catch (IntentSender.SendIntentException e) {
+//                // Unable to resolve, message user appropriately
+//            }
+//        } else {
+//            GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 0).show();
+//        }
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -91,5 +130,36 @@ public class MainActivity extends AppCompatActivity {
 
     public void pushButton(View view) {
         boolean connected = checkForNetworkConnectivity();
+    }
+
+    public void pullButton(View view) {
+        // Connect to Drive server
+        ResultCallback<DriveApi.DriveContentsResult> contentsCallback = new
+                ResultCallback<DriveApi.DriveContentsResult>() {
+                    @Override
+                    public void onResult(DriveApi.DriveContentsResult result) {
+                        if (!result.getStatus().isSuccess()) {
+                            // Handle error
+                            return;
+                        }
+
+                        MetadataChangeSet metadataChangeSet = new MetadataChangeSet.Builder()
+                                .setMimeType("text/html").build();
+                        IntentSender intentSender = Drive.DriveApi
+                                .newCreateFileActivityBuilder()
+                                .setInitialMetadata(metadataChangeSet)
+                                .setInitialDriveContents(result.getDriveContents())
+                                .build(getGoogleApiClient());
+                        try {
+                            startIntentSenderForResult(intentSender, 1, null, 0, 0, 0);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Handle the exception
+                        }
+                    }
+                };
+    }
+
+    public GoogleApiClient getGoogleApiClient() {
+        return mGoogleApiClient;
     }
 }

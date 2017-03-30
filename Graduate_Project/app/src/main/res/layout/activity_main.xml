@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="hamblin.graduate_project.MainActivity">
 
-    <TextView
+    <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/default_text"
@@ -36,5 +36,6 @@
         android:layout_toEndOf="@+id/push_button"
         android:layout_toRightOf="@+id/push_button"
         android:layout_marginTop="10dp"
+        android:onClick="pullButton"
         android:text="@string/pull_string" />
 </RelativeLayout>
