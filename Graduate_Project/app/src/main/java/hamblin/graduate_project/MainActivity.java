@@ -221,6 +221,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
                 });
+/**
+        MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+                .setTitle("New file")
+                .setMimeType("text/plain")
+                .setStarred(true).build();
+
+        Drive.DriveApi.getRootFolder(getGoogleApiClient())
+                .createFile(getGoogleApiClient(), changeSet, null)
+                .setResultCallback(fileCallback);
+        **/
 
 
 
