@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -32,6 +34,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     GoogleApiClient mGoogleApiClient;
     final int RESOLVE_CONNECTION_REQUEST_CODE = 456;
+    SharedPreferences myPreference;
+    SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +47,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String[] permissionList = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         ActivityCompat.requestPermissions(this, permissionList, 123);
 
-//        GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(this, DriveScopes.DRIVE);
-//        credential.setSelectedAccountName(accountName);
-//        Drive service = new Drive.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(), credential).build();
+        myPreference = PreferenceManager.getDefaultSharedPreferences(this);
+        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                if (key.equals("drive_account"))
+                    changeDriveAccount();
+            }
+        };
+
+        myPreference.registerOnSharedPreferenceChangeListener(listener);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Drive.API)
@@ -55,16 +65,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .build();
 
         mGoogleApiClient.connect();
-
-
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-    }
-
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -90,10 +91,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-
-
-
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
@@ -103,9 +100,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnectionSuspended(int i) {
 
     }
-
-
-
 
 //    @Override
 //    public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -210,20 +204,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 };
 
         Log.e("Check Callback",contentsCallback.toString());
-
-
     }
 
     public void pullButton(View view) {
         // Connect to Drive server
         Log.e("Help","Shit Should work");
+    }
 
+    private void changeDriveAccount() {
+        Log.d("Preferences", "Clicked Drive Account");
+        Toast.makeText(this, "Suh", Toast.LENGTH_SHORT).show();
     }
 
     public GoogleApiClient getGoogleApiClient() {
         return mGoogleApiClient;
     }
-
-
-
 }

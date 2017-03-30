@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:text="@string/default_text"
         android:textSize="22sp"
+        android:inputType="text"
         android:id="@+id/edit_text" />
 
     <Button

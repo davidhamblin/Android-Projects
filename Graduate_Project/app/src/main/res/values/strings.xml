@@ -5,4 +5,5 @@
     <string name="push_string">Push</string>
     <string name="pull_string">Pull</string>
     <string name="default_text">Online Text Goes Here</string>
+    <string name="drive_account">Select the Google Drive Account</string>
 </resources>

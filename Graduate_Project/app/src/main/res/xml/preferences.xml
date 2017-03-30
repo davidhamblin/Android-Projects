@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <EditTextPreference android:title="Username"
-        android:summary="Username for accessing online Amazon database"
-        android:key="username"
-        android:id="@+id/username" />
+    <EditTextPreference android:title="File Name"
+        android:summary="Name of File Accessed on Drive Server"
+        android:key="filename"
+        android:id="@+id/filename" />
 
+    <Preference android:title="Drive Account"
+        android:key="drive_account"
+        android:summary="@string/drive_account"
+        android:selectable="true" />
 
 </PreferenceScreen>
