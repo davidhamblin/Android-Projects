@@ -1,10 +1,12 @@
 package hamblin.graduate_project;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,7 +22,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        boolean connected = checkForNetworkConnectivity();
+        // Ask for permissions once the app first launches, so there are no crashes later
+        // Necessary in Android 6.0 and above, with runtime permission checking :(
+        String[] permissionList = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        ActivityCompat.requestPermissions(this, permissionList, 123);
     }
 
     @Override
@@ -65,12 +70,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void showAbout() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("David Hamblin")
-                .setMessage("Graduate Project\nGraduate student in CPSC 575\nCool dude overall");
+        builder.setTitle("David Hamblin & Jake Hayhurst")
+                .setMessage("Graduate Project\nGraduate students in CPSC 575\nCool dudes overall");
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Snackbar.make(findViewById(R.id.activity_main), "Thanks for reading my About!", Snackbar.LENGTH_LONG)
+                Snackbar.make(findViewById(R.id.activity_main), "Thanks for reading our About!", Snackbar.LENGTH_LONG)
                         .setAction("CLOSE", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -82,5 +87,9 @@ public class MainActivity extends AppCompatActivity {
 //        builder.setIcon(R.drawable.david);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public void pushButton(View view) {
+        boolean connected = checkForNetworkConnectivity();
     }
 }
