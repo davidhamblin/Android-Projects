@@ -2,12 +2,15 @@ package hamblin.bikes_project;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +26,9 @@ import java.util.List;
 
 public class Activity_ListView extends AppCompatActivity {
 	ListView my_listview;
+    SharedPreferences myPreference;
+    SharedPreferences.OnSharedPreferenceChangeListener listener;
+    String JSONOutput;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +52,29 @@ public class Activity_ListView extends AppCompatActivity {
 
 		//TODO call a thread to get the JSON list of bikes
 		//TODO when it returns it should process this data with bindData
+        myPreference = PreferenceManager.getDefaultSharedPreferences(this);
+        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                if (key.equals("json_list"))
+                    connectAndLoadList(prefs.getString(key, ""));
+            }
+        };
+
+        myPreference.registerOnSharedPreferenceChangeListener(listener);
 	}
+
+    private void connectAndLoadList(String address) {
+        // No address value attached to key
+        if(address.isEmpty()) {
+            Log.e("connectAndLoad", "No address listed");
+            Toast.makeText(this, "No address attached to the selected list item", Toast.LENGTH_LONG).show();
+            return;
+        }
+//        petAddress = address;
+        Toast.makeText(this, "Loading: " + address, Toast.LENGTH_SHORT).show();
+        DownloadTask task = new DownloadTask(this);
+        task.execute(address);
+    }
 
 	private void setupListViewOnClickListener() {
 		//TODO you want to call my_listviews setOnItemClickListener with a new instance of android.widget.AdapterView.OnItemClickListener() {
@@ -59,9 +87,15 @@ public class Activity_ListView extends AppCompatActivity {
 	 *
 	 * @param JSONString  complete string of all bikes
 	 */
-	private void bindData(String JSONString) {
-
-	}
+	private synchronized void bindData(String JSONString) {
+        Toast.makeText(this, "Loaded List", Toast.LENGTH_SHORT).show();
+        Log.d("bindData", JSONString);
+        List<BikeData> bikesList = JSONHelper.parseAll(JSONString);
+        int counter = 0;
+        for(BikeData b : bikesList) {
+            Log.d("bindData", "" + counter++);
+        }
+    }
 
 	Spinner spinner;
 	/**
@@ -142,5 +176,10 @@ public class Activity_ListView extends AppCompatActivity {
 //        builder.setIcon(R.drawable.david);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public synchronized void setJSONData(String JSONData) {
+        this.JSONOutput = JSONData;
+        bindData(JSONData);
     }
 }

@@ -2,6 +2,7 @@ package hamblin.bikes_project;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -22,7 +23,7 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
 
     // 1 second
     private static final int TIMEOUT = 1000;
-    private String myQuery = "";
+    private String myQuery = "bikes.json";
     String myURL;
     int statusCode = 0;
 
@@ -118,6 +119,7 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         //TODO Your Stuff Here
+        myActivity.setJSONData(result);
     }
 
     /*

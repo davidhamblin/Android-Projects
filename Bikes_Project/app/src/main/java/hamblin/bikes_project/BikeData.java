@@ -53,27 +53,27 @@ public class BikeData {
         // notice it returns this bulder
         // makes it suitable for chaining
         Builder setDescription(String Description) {
-            //TODO manage this
+            this.Description = Description;
             return this;
         }
 
         Builder setLocation(String Location) {
-
+            this.Location = Location;
             return this;
         }
 
         Builder setDate(String Date) {
-
+            this.Date = Date;
             return this;
         }
 
         Builder setPicture(String Picture) {
-
+            this.Picture = Picture;
             return this;
         }
 
         Builder setLink(String Link) {
-
+            this.Link = Link;
             return this;
         }
 
