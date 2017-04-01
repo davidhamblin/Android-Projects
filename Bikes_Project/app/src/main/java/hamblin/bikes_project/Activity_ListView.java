@@ -1,5 +1,6 @@
 package hamblin.bikes_project;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,6 +30,7 @@ public class Activity_ListView extends AppCompatActivity {
     SharedPreferences myPreference;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
     String JSONOutput;
+    CustomAdapter adapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,9 @@ public class Activity_ListView extends AppCompatActivity {
         };
 
         myPreference.registerOnSharedPreferenceChangeListener(listener);
+
+        if(ConnectivityCheck.isNetworkReachableAlertUserIfNot(this))
+            connectAndLoadList(myPreference.getString("json_list", ""));
 	}
 
     private void connectAndLoadList(String address) {
@@ -78,6 +83,12 @@ public class Activity_ListView extends AppCompatActivity {
 
 	private void setupListViewOnClickListener() {
 		//TODO you want to call my_listviews setOnItemClickListener with a new instance of android.widget.AdapterView.OnItemClickListener() {
+        my_listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
 	}
 
 	/**
@@ -92,9 +103,13 @@ public class Activity_ListView extends AppCompatActivity {
         Log.d("bindData", JSONString);
         List<BikeData> bikesList = JSONHelper.parseAll(JSONString);
         int counter = 0;
+        List<String> bikeNames = new ArrayList<>();
         for(BikeData b : bikesList) {
+            bikeNames.add(b.toString());
             Log.d("bindData", "" + counter++);
         }
+        this.adapter = new CustomAdapter(this, R.layout.listview_row_layout, bikesList);
+        my_listview.setAdapter(adapter);
     }
 
 	Spinner spinner;
@@ -109,9 +124,9 @@ public class Activity_ListView extends AppCompatActivity {
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
         List<String> bikeNames = new ArrayList<>();
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.sortable_fields, R.layout.spinner_item);
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.sortable_fields, R.layout.spinner_item);
         spinner.setVisibility(View.VISIBLE);
-        spinner.setAdapter(adapter);
+        spinner.setAdapter(spinnerAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             static final int SELECTED_ITEM = 0;
 
@@ -119,8 +134,8 @@ public class Activity_ListView extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (parent.getChildAt(SELECTED_ITEM) != null) {
                     // Sort according to selection. Use comparators.
-//                    ((TextView) parent.getChildAt(SELECTED_ITEM)).setTextColor(Color.WHITE);
-                    Toast.makeText(Activity_ListView.this, (String) parent.getItemAtPosition(position), Toast.LENGTH_SHORT).show();
+                    if(Activity_ListView.this.adapter != null)
+                        Activity_ListView.this.adapter.sortList(position);
                 }
             }
 

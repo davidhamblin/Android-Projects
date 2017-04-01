@@ -102,5 +102,6 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     @Override
     protected void onPostExecute(Bitmap result) {
         //TODO Your Stuff Here
+
     }
 }

@@ -6,10 +6,11 @@ package hamblin.bikes_project;
  * with many optional fields
  */
 public class BikeData {
-    public static final int COMPANY = 0;
-    public static final int MODEL = 1;
-    public static final int PRICE = 2;
-    public static final int LOCATION = 3;
+    public final String COMPANY;
+    public final String MODEL;
+    public final double PRICE;
+    public final String LOCATION;
+    public final String DESCRIPTION;
 
     //TODO make all BikeData fields final
 
@@ -19,11 +20,16 @@ public class BikeData {
     @Override
     public String toString() {
         // TODO figure out how to print all bikedata out for dialogs
-        return "TODO";
+        return this.MODEL;
     }
 
     private BikeData(Builder b) {
         //TODO
+        this.COMPANY = b.Company;
+        this.MODEL = b.Model;
+        this.PRICE = b.Price;
+        this.LOCATION = b.Location;
+        this.DESCRIPTION = b.Description;
     }
 
     /**
