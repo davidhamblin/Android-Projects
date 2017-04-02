@@ -11,16 +11,24 @@ public class BikeData {
     public final double PRICE;
     public final String LOCATION;
     public final String DESCRIPTION;
-
-    //TODO make all BikeData fields final
+    public final String DATE;
+    public final String PICTURE;
+    public final String LINK;
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        // TODO figure out how to print all bikedata out for dialogs
-        return this.MODEL;
+        String dialogBlock = "";
+        dialogBlock += "Company: " + this.COMPANY + "\n\n";
+        dialogBlock += "Model: " + this.MODEL + "\n\n";
+        dialogBlock += "Price: " + this.PRICE + "\n\n";
+        dialogBlock += "Location: " + this.LOCATION + "\n\n";
+        dialogBlock += "Date: " + this.DATE + "\n\n";
+        dialogBlock += "Description: " + this.DESCRIPTION + "\n\n";
+        dialogBlock += "Link: " + this.LINK + "\n\n";
+        return dialogBlock;
     }
 
     private BikeData(Builder b) {
@@ -28,8 +36,11 @@ public class BikeData {
         this.COMPANY = b.Company;
         this.MODEL = b.Model;
         this.PRICE = b.Price;
-        this.LOCATION = b.Location;
-        this.DESCRIPTION = b.Description;
+        this.LOCATION = (b.Location != null) ? b.Location : "N/A";
+        this.DESCRIPTION = (b.Description != null) ? b.Description : "N/A";
+        this.DATE = (b.Date != null ) ? b.Date : "N/A";
+        this.PICTURE = (b.Picture != null) ? b.Picture : "N/A";
+        this.LINK = (b.Link != null) ? b.Link : "N/A";
     }
 
     /**

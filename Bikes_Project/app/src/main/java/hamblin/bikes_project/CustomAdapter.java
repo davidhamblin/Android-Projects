@@ -2,15 +2,19 @@ package hamblin.bikes_project;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by David on 4/1/2017.
@@ -90,27 +94,40 @@ public class CustomAdapter extends BaseAdapter {
         return position;
     }
 
+    static class ViewHolder {
+        TextView modelView, priceView, descView;
+        ImageView bikeImage;
+        int viewPos;
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = null;
+        ViewHolder myVh;
+
         if (convertView == null) {
-            view = inflater.inflate(layoutId, parent, false);
-        } else {
-            view = convertView;
+            convertView = inflater.inflate(layoutId, parent, false);
+
+            myVh = new ViewHolder();
+            myVh.bikeImage = (ImageView) convertView.findViewById(R.id.imageView1);
+            myVh.modelView = (TextView) convertView.findViewById(R.id.Model);
+            myVh.priceView = (TextView) convertView.findViewById(R.id.Price);
+            myVh.descView = (TextView) convertView.findViewById(R.id.Description);
+            convertView.setTag(myVh);
         }
 
-        // set the model
-        TextView modelView = (TextView) view.findViewById(R.id.Model);
-        modelView.setText(bikeList.get(position).MODEL);
+        myVh = (ViewHolder)convertView.getTag();
 
-        // set the price
-        TextView priceView = (TextView) view.findViewById(R.id.Price);
-        priceView.setText(Double.toString(bikeList.get(position).PRICE));
+        // set the model, price, and description
+        myVh.modelView.setText(bikeList.get(position).MODEL);
+        myVh.priceView.setText(Double.toString(bikeList.get(position).PRICE));
+        myVh.descView.setText(bikeList.get(position).DESCRIPTION);
 
-        // set the description
-        TextView descView = (TextView) view.findViewById(R.id.Description);
-        descView.setText(bikeList.get(position).DESCRIPTION);
+        myVh.viewPos = position;
 
-        return view;
+        String address = PreferenceManager.getDefaultSharedPreferences(activity).getString("json_list", "");
+
+        new DownloadImageTask(bikeList.get(position).PICTURE, myVh.bikeImage, myVh).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, address);
+
+        return convertView;
     }
 }

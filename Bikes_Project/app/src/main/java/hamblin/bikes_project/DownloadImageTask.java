@@ -19,16 +19,20 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     private static final String TAG = "DownloadTask";
     private static final int DEFAULTBUFFERSIZE = 50;
     private static final int NODATA = -1;
+    private final int orig_position;
+    private final CustomAdapter.ViewHolder myVh;
 
     private String pictureID;
     private ImageView imageView;
     private Drawable placeholder;
 
-    public DownloadImageTask(String pictureID, ImageView imageView) {
+    public DownloadImageTask(String pictureID, ImageView imageView, CustomAdapter.ViewHolder myVh) {
         this.pictureID = pictureID;
         this.imageView = imageView;
         Resources resources = imageView.getContext().getResources();
         this.placeholder = resources.getDrawable(R.drawable.generic);
+        this.orig_position = myVh.viewPos;
+        this.myVh = myVh;
     }
 
     @Override
@@ -40,7 +44,7 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     protected Bitmap doInBackground(String... params) {
 
         // site we want to connect to
-        String url = params[0];
+        String url = params[0] + pictureID;
         Log.d(TAG, "URL is " + url);
 
         // note streams are left willy-nilly here because it declutters the
@@ -54,8 +58,8 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
             // can further configure connection before getting data
             // cannot do this after connected
             // connection.setRequestMethod("GET");
-            connection.setReadTimeout(500);
-            connection.setConnectTimeout(500);
+            connection.setReadTimeout(3000);
+            connection.setConnectTimeout(3000);
 
             // this opens a connection, then sends GET & headers
             connection.connect();
@@ -101,7 +105,9 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 
     @Override
     protected void onPostExecute(Bitmap result) {
-        //TODO Your Stuff Here
-
+        super.onPostExecute(result);
+        // Only sets image if at correct position, prevents showing wrong images
+        if (myVh.viewPos == orig_position)
+            imageView.setImageBitmap(result);
     }
 }

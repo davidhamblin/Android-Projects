@@ -1,5 +1,6 @@
 package hamblin.bikes_project;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -36,6 +38,11 @@ public class Activity_ListView extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+        // Ask for permissions once the app first launches, so there are no crashes later
+        // Necessary in Android 6.0 and above, with runtime permission checking :(
+        String[] permissionList = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE};
+        ActivityCompat.requestPermissions(this, permissionList, 123);
 
 		// Change title to indicate sort by
 		setTitle("Sort by:");
@@ -86,7 +93,16 @@ public class Activity_ListView extends AppCompatActivity {
         my_listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(Activity_ListView.this);
+                builder.setMessage(parent.getItemAtPosition(position).toString());
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
 	}
