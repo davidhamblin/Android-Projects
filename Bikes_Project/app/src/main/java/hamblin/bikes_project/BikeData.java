@@ -6,14 +6,14 @@ package hamblin.bikes_project;
  * with many optional fields
  */
 public class BikeData {
-    public final String COMPANY;
-    public final String MODEL;
-    public final double PRICE;
-    public final String LOCATION;
-    public final String DESCRIPTION;
-    public final String DATE;
-    public final String PICTURE;
-    public final String LINK;
+    final String COMPANY;
+    final String MODEL;
+    final double PRICE;
+    final String LOCATION;
+    final String DESCRIPTION;
+    final String DATE;
+    final String PICTURE;
+    final String LINK;
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()

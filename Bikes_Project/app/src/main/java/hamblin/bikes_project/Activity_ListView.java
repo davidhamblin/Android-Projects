@@ -1,11 +1,9 @@
 package hamblin.bikes_project;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
@@ -21,17 +19,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Activity_ListView extends AppCompatActivity {
 	ListView my_listview;
     SharedPreferences myPreference;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
-    String JSONOutput;
     CustomAdapter adapter;
 
 	@Override
@@ -59,8 +54,6 @@ public class Activity_ListView extends AppCompatActivity {
 		//set the listview onclick listener
 		setupListViewOnClickListener();
 
-		//TODO call a thread to get the JSON list of bikes
-		//TODO when it returns it should process this data with bindData
         myPreference = PreferenceManager.getDefaultSharedPreferences(this);
         listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
@@ -71,8 +64,7 @@ public class Activity_ListView extends AppCompatActivity {
 
         myPreference.registerOnSharedPreferenceChangeListener(listener);
 
-        if(ConnectivityCheck.isNetworkReachableAlertUserIfNot(this))
-            connectAndLoadList(myPreference.getString("json_list", ""));
+        refreshList();
 	}
 
     private void connectAndLoadList(String address) {
@@ -82,14 +74,12 @@ public class Activity_ListView extends AppCompatActivity {
             Toast.makeText(this, "No address attached to the selected list item", Toast.LENGTH_LONG).show();
             return;
         }
-//        petAddress = address;
         Toast.makeText(this, "Loading: " + address, Toast.LENGTH_SHORT).show();
         DownloadTask task = new DownloadTask(this);
         task.execute(address);
     }
 
 	private void setupListViewOnClickListener() {
-		//TODO you want to call my_listviews setOnItemClickListener with a new instance of android.widget.AdapterView.OnItemClickListener() {
         my_listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -110,20 +100,13 @@ public class Activity_ListView extends AppCompatActivity {
 	/**
 	 * Takes the string of bikes, parses it using JSONHelper
 	 * Sets the adapter with this list using a custom row layout and an instance of the CustomAdapter
-	 * binds the adapter to the Listview using setAdapter
+	 * binds the adapter to the ListView using setAdapter
 	 *
 	 * @param JSONString  complete string of all bikes
 	 */
-	private synchronized void bindData(String JSONString) {
-        Toast.makeText(this, "Loaded List", Toast.LENGTH_SHORT).show();
+	private void bindData(String JSONString) {
         Log.d("bindData", JSONString);
         List<BikeData> bikesList = JSONHelper.parseAll(JSONString);
-        int counter = 0;
-        List<String> bikeNames = new ArrayList<>();
-        for(BikeData b : bikesList) {
-            bikeNames.add(b.toString());
-            Log.d("bindData", "" + counter++);
-        }
         this.adapter = new CustomAdapter(this, R.layout.listview_row_layout, bikesList);
         my_listview.setAdapter(adapter);
     }
@@ -137,8 +120,7 @@ public class Activity_ListView extends AppCompatActivity {
 	 * dontforget to bind the listener to the spinner with setOnItemSelectedListener!
 	 */
 	private void setupSimpleSpinner() {
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
-        List<String> bikeNames = new ArrayList<>();
+        spinner = (Spinner) findViewById(R.id.spinner);
 
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.sortable_fields, R.layout.spinner_item);
         spinner.setVisibility(View.VISIBLE);
@@ -149,7 +131,7 @@ public class Activity_ListView extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (parent.getChildAt(SELECTED_ITEM) != null) {
-                    // Sort according to selection. Use comparators.
+                    // Sorts according to selection using Comparator
                     if(Activity_ListView.this.adapter != null)
                         Activity_ListView.this.adapter.sortList(position);
                 }
@@ -178,12 +160,23 @@ public class Activity_ListView extends AppCompatActivity {
                 showAbout();
                 break;
             case R.id.action_refresh:
+                refreshList();
                 break;
 			default:
 				break;
 		}
 		return true;
 	}
+
+    private void refreshList() {
+        // Clears the ListView and resets spinner
+        my_listview.setAdapter(null);
+        spinner.setSelection(0);
+
+        // Checks for network connectivity, then downloads the list of bikes
+        if(ConnectivityCheck.isNetworkReachableAlertUserIfNot(this))
+            connectAndLoadList(myPreference.getString("json_list", ""));
+    }
 
     /**
      * Shows personal/project information in an About dialog opened from the overflow menu
@@ -204,13 +197,12 @@ public class Activity_ListView extends AppCompatActivity {
                         }).show();
             }
         });
-//        builder.setIcon(R.drawable.david);
+        builder.setIcon(R.drawable.david);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
     public synchronized void setJSONData(String JSONData) {
-        this.JSONOutput = JSONData;
         bindData(JSONData);
     }
 }

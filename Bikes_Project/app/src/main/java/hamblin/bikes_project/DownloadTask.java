@@ -19,13 +19,11 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
 
     private static final String TAG = "DownloadTask";
     private static final int BUFFER_SIZE = 8096;
-    Activity_ListView myActivity;
+    private Activity_ListView myActivity;
 
-    // 1 second
-    private static final int TIMEOUT = 1000;
+    // 3 second timeout
+    private static final int TIMEOUT = 3000;
     private String myQuery = "bikes.json";
-    String myURL;
-    int statusCode = 0;
 
     DownloadTask(Activity_ListView activity) {
         attach(activity);
@@ -61,7 +59,7 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... params) {
         // site we want to connect to
-        myURL = params[0];
+        String myURL = params[0];
 
         try {
             URL url = new URL(myURL + myQuery);
@@ -86,7 +84,7 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
                 // lets see what we got make sure its one of
                 // the 200 codes (there can be 100 of them
                 // http_status / 100 != 2 does integer div any 200 code will = 2
-                statusCode = connection.getResponseCode();
+                int statusCode = connection.getResponseCode();
                 if (statusCode / 100 != 2) {
                     Log.e(TAG, "Error-connection.getResponseCode returned "
                             + Integer.toString(statusCode));
@@ -106,7 +104,7 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
 
             } finally {
                 // close resource no matter what exception occurs
-                in.close();
+                if(in != null) in.close();
                 connection.disconnect();
             }
         } catch (Exception exc) {
@@ -117,7 +115,6 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        //TODO Your Stuff Here
         myActivity.setJSONData(result);
     }
 

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Bikes_Project</string>
+    <string name="app_name">Hamblin Project 4</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="tetonURL">http://www.tetonsoftware.com/bikes/</string>
     <string name="tetonNAME">Pair - Teton Software</string>
+    <string name="perkinsURL">http://www.pcs.cnu.edu/~kperkins/bikes/</string>
+    <string name="perkinsNAME">CNU - Defender</string>
     <string name="list_title">JSON Servers</string>
     <string name="list_summary">List of JSON servers to download contents from</string>
     <string name="action_settings">Settings</string>

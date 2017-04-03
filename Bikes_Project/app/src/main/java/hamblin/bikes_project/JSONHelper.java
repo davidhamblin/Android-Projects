@@ -32,10 +32,10 @@ public class JSONHelper {
     }
 
     /**
-     * @param jsonString
-     * @return List<UserData>
-     * takes a json string and parses it into json objects
+     * Takes a json string and parses it into json objects
      * You must know what is in the data and what to parse out of it
+     * @param jsonString    String in the proper JSON format
+     * @return List<UserData>
      */
     public static List<BikeData> parseAll(String jsonString) {
         //list of all the bikes

@@ -14,13 +14,9 @@ import android.widget.TextView;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.Locale;
 
-/**
- * Created by David on 4/1/2017.
- */
-
-public class CustomAdapter extends BaseAdapter {
+class CustomAdapter extends BaseAdapter {
     private static final 	int COMPANY = 0;
     private static final 	int MODEL = 1;
     private static final 	int PRICE = 2;
@@ -30,7 +26,7 @@ public class CustomAdapter extends BaseAdapter {
     private 				int layoutId;
     private LayoutInflater inflater;
 
-    public CustomAdapter(Activity activity, int layoutId, List<BikeData> bikes) {
+    CustomAdapter(Activity activity, int layoutId, List<BikeData> bikes) {
         this.activity = activity;
         this.layoutId = layoutId;
         this.bikeList = bikes;
@@ -39,7 +35,7 @@ public class CustomAdapter extends BaseAdapter {
             this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void sortList(int sort_style) {
+    void sortList(int sort_style) {
         switch(sort_style) {
             case COMPANY:
                 Collections.sort(bikeList, new Comparator<BikeData>() {
@@ -119,7 +115,7 @@ public class CustomAdapter extends BaseAdapter {
 
         // set the model, price, and description
         myVh.modelView.setText(bikeList.get(position).MODEL);
-        myVh.priceView.setText(Double.toString(bikeList.get(position).PRICE));
+        myVh.priceView.setText(String.format(Locale.US, "%.2f", bikeList.get(position).PRICE));
         myVh.descView.setText(bikeList.get(position).DESCRIPTION);
 
         myVh.viewPos = position;
