@@ -54,6 +54,7 @@ public class Activity_ListView extends AppCompatActivity {
 		//set the listview onclick listener
 		setupListViewOnClickListener();
 
+        // Sets up the preference listener for changing download site
         myPreference = PreferenceManager.getDefaultSharedPreferences(this);
         listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
@@ -64,9 +65,13 @@ public class Activity_ListView extends AppCompatActivity {
 
         myPreference.registerOnSharedPreferenceChangeListener(listener);
 
+        // Refreshes the listview with the default site in preferences on startup
         refreshList();
 	}
 
+    /**
+     * Try and connect to the server selected in Settings to download the image list
+     */
     private void connectAndLoadList(String address) {
         // No address value attached to key
         if(address.isEmpty()) {
@@ -79,6 +84,10 @@ public class Activity_ListView extends AppCompatActivity {
         task.execute(address);
     }
 
+    /**
+     * Creates the OnClickListener for the ListView
+     * Opens an alert dialog with pertinent information for the bike, beyond the Model, Price, Description info
+     */
 	private void setupListViewOnClickListener() {
         my_listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -117,7 +126,6 @@ public class Activity_ListView extends AppCompatActivity {
 	 * bind it to the spinner
 	 * Also create a OnItemSelectedListener for this spinner so
 	 * when a user clicks the spinner the list of bikes is resorted according to selection
-	 * dontforget to bind the listener to the spinner with setOnItemSelectedListener!
 	 */
 	private void setupSimpleSpinner() {
         spinner = (Spinner) findViewById(R.id.spinner);
@@ -142,6 +150,11 @@ public class Activity_ListView extends AppCompatActivity {
         });
 	}
 
+    /**
+     * Gives life to the menu, using design and items from menu.xml
+     * @param menu Menu to inflate, typically the toolbar set
+     * @return true, the menu has been inflated
+     */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -149,6 +162,11 @@ public class Activity_ListView extends AppCompatActivity {
 		return true;
 	}
 
+    /**
+     * Once an item is selected from the menu, execute a specific method or activity
+     * @param item Item selected by the user
+     * @return true, the action has been taken
+     */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -168,6 +186,11 @@ public class Activity_ListView extends AppCompatActivity {
 		return true;
 	}
 
+    /**
+     * Resets the ListView to nothing, and the spinner to default
+     * Checks for network connectivity
+     * and then loads the ListView with the selected list in preferences
+     */
     private void refreshList() {
         // Clears the ListView and resets spinner
         my_listview.setAdapter(null);
@@ -202,6 +225,10 @@ public class Activity_ListView extends AppCompatActivity {
         dialog.show();
     }
 
+    /**
+     * Method to extract the JSONString from the finished DownloadTask and use it in this activity
+     * @param JSONData String extracted from the online path defined in Settings
+     */
     public synchronized void setJSONData(String JSONData) {
         bindData(JSONData);
     }

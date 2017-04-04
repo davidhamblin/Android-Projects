@@ -67,7 +67,7 @@ public class BikeData {
         }
 
         // the following are setters
-        // notice it returns this bulder
+        // notice it returns this builder
         // makes it suitable for chaining
         Builder setDescription(String Description) {
             this.Description = Description;

@@ -26,9 +26,9 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     private ImageView imageView;
     private Drawable placeholder;
 
-    public DownloadImageTask(String pictureID, ImageView imageView, CustomAdapter.ViewHolder myVh) {
+    public DownloadImageTask(String pictureID, CustomAdapter.ViewHolder myVh) {
         this.pictureID = pictureID;
-        this.imageView = imageView;
+        this.imageView = myVh.bikeImage;
         Resources resources = imageView.getContext().getResources();
         this.placeholder = resources.getDrawable(R.drawable.generic);
         this.orig_position = myVh.viewPos;

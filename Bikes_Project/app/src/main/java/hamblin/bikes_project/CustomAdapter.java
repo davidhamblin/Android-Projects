@@ -16,6 +16,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Custom adapter class for displaying information pertinent to the bikes in this project
+ * @author David
+ */
 class CustomAdapter extends BaseAdapter {
     private static final 	int COMPANY = 0;
     private static final 	int MODEL = 1;
@@ -35,6 +39,10 @@ class CustomAdapter extends BaseAdapter {
             this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    /**
+     * For sorting according to spinner selection, using anonymous Comparator classes
+     * @param sort_style Defines attribute to sort on
+     */
     void sortList(int sort_style) {
         switch(sort_style) {
             case COMPANY:
@@ -90,12 +98,22 @@ class CustomAdapter extends BaseAdapter {
         return position;
     }
 
+    /**
+     * ViewHolder pattern implementation to hold parts of the row
+     */
     static class ViewHolder {
         TextView modelView, priceView, descView;
         ImageView bikeImage;
         int viewPos;
     }
 
+    /**
+     * Updates the rows of the ListView as they are displayed, utilizing threads to download the associated images
+     * @param position Current row position
+     * @param convertView View of the current row
+     * @param parent ListView that the row belongs to
+     * @return convertView
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder myVh;
@@ -122,7 +140,7 @@ class CustomAdapter extends BaseAdapter {
 
         String address = PreferenceManager.getDefaultSharedPreferences(activity).getString("json_list", "");
 
-        new DownloadImageTask(bikeList.get(position).PICTURE, myVh.bikeImage, myVh).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, address);
+        new DownloadImageTask(bikeList.get(position).PICTURE, myVh).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, address);
 
         return convertView;
     }
