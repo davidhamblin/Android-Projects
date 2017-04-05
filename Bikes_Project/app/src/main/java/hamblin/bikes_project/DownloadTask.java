@@ -115,7 +115,10 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        myActivity.setJSONData(result);
+        if(result != null)
+            myActivity.setJSONData(result);
+        else
+            Toast.makeText(myActivity, "Could not connect to server", Toast.LENGTH_LONG).show();
     }
 
     /*
