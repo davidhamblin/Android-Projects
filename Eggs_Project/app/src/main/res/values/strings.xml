@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Eggs_Project</string>
+    <string name="button_add">Add 1 Egg</string>
+    <string name="button_add_two">Add 2 Eggs</string>
+    <string name="button_subtract">Subtract 1 Egg</string>
+    <string name="button_make">Make Breakfast</string>
+</resources>
