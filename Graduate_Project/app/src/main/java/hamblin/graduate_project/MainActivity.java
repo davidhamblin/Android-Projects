@@ -33,6 +33,8 @@ import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.MetadataChangeSet;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -174,6 +176,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 //        builder.setIcon(R.drawable.david);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public void createJSONObject() {
+        JSONObject textToPush = new JSONObject();
+
     }
 
     public void pushButton(View view) {
