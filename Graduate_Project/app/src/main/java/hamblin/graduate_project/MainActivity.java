@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -33,6 +34,7 @@ import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.MetadataChangeSet;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -49,11 +51,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     SharedPreferences myPreference;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
     final int REQUEST_CODE_CREATOR = 1;
+    EditText editView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        editView = (EditText) findViewById(R.id.edit_text);
 
         // Ask for permissions once the app first launches, so there are no crashes later
         // Necessary in Android 6.0 and above, with runtime permission checking :(
@@ -178,13 +183,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         dialog.show();
     }
 
-    public void createJSONObject() {
+    public JSONObject createJSONObject() {
         JSONObject textToPush = new JSONObject();
+        String enteredText = editView.getText().toString();
+        Toast.makeText(this, enteredText, Toast.LENGTH_SHORT).show();
+        try {
+            textToPush.put("text", enteredText);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return textToPush;
+    }
 
+    public void extractStringFromJSON(String stringToExtract) {
+        try {
+            JSONObject extractedString = new JSONObject(stringToExtract);
+            String newText = extractedString.getString("text");
+            editView.setText(newText);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("extractStringFromJSON", "Invalid JSON file");
+        }
     }
 
     public void pushButton(View view) {
         boolean connected = checkForNetworkConnectivity();
+        final JSONObject objToWrite = createJSONObject();
+        final String fileTitle = myPreference.getString("drive_account", "newFile");
         Log.e("Push", "Past Connected function");
         Drive.DriveApi.newDriveContents(getGoogleApiClient())
                 .setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
@@ -201,15 +226,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         OutputStream outputStream = driveContents.getOutputStream();
                         Writer writer = new OutputStreamWriter(outputStream);
                         try {
-                            writer.write("Hello World!");
+//                            writer.write("Hello World!");
+                            writer.write(objToWrite.toString());
                             writer.close();
                         } catch (IOException e) {
                             Log.e("IO exception", e.getMessage());
                         }
 
                         MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-                                .setTitle("New file")
-                                .setMimeType("text/plain")
+                                .setTitle(fileTitle)
+                                .setMimeType("application/json")
                                 .setStarred(true).build();
 
                         // create a file on root folder
@@ -232,7 +258,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     public void pullButton(View view) {
         // Connect to Drive server
+        // Need separate thread for connecting and downloading JSON
         Log.e("Help","Shit Should work");
+
+        // Read contents of file at Drive location into string, insert string into method below
+        extractStringFromJSON("{ \"text\": \"This IS A Test\" }");
     }
 
     private void changeDriveAccount() {
