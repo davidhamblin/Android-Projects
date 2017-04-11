@@ -12,21 +12,21 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="33dp"
         android:text="@string/button_add"
-        android:onClick="addOneEgg" />
+        android:onClick="launchEggIntent" />
 
     <Button
         android:id="@+id/button_add_two"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_add_two"
-        android:onClick="addTwoEggs" />
+        android:onClick="launchEggIntent" />
 
     <Button
         android:id="@+id/button_subtract"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_subtract"
-        android:onClick="subtractOneEgg" />
+        android:onClick="launchEggIntent" />
 
     <Button
         android:id="@+id/button_make"
@@ -34,5 +34,5 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:text="@string/button_make"
-        android:onClick="makeBreakfast" />
+        android:onClick="launchEggIntent" />
 </TableLayout>
