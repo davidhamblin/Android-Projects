@@ -13,4 +13,11 @@
         android:title="@string/about_dialog"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/drive_account"
+        android:orderInCategory="3"
+        android:title="Drive Account"
+        android:icon="@drawable/common_google_signin_btn_icon_light_focused"
+        app:showAsAction="always" />
+
 </menu>

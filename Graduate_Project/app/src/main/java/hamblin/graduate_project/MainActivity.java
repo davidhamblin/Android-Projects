@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import com.google.android.gms.common.api.ResultCallback;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         GoogleApiClient.OnConnectionFailedListener {
 
     private EditText editView;
+    private boolean connected;
 
     SharedPreferences myPreference;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
@@ -75,10 +77,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int REQUEST_CODE_CREATOR = 2;
     private static final int REQUEST_CODE_RESOLUTION = 3;
 
-
-
     private GoogleApiClient mGoogleApiClient;
-    private Bitmap mBitmapToSave;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,13 +92,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         ActivityCompat.requestPermissions(this, permissionList, 123);
 
         myPreference = PreferenceManager.getDefaultSharedPreferences(this);
-        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-                if (key.equals("drive_account"))
-                    changeDriveAccount();
-            }
-        };
-
     }
 
     @Override
@@ -118,6 +110,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 break;
             case R.id.action_about:
                 showAbout();
+                break;
+            case R.id.drive_account:
+                changeDriveAccount();
                 break;
             default:
                 break;
@@ -166,7 +161,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public JSONObject createJSONObject() {
         JSONObject textToPush = new JSONObject();
         String enteredText = editView.getText().toString();
-        Toast.makeText(this, enteredText, Toast.LENGTH_SHORT).show();
         try {
             textToPush.put("text", enteredText);
         } catch (JSONException e) {
@@ -187,29 +181,47 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public void pushButton(View view) {
-        boolean connected = checkForNetworkConnectivity();
+        connected = checkForNetworkConnectivity();
         final JSONObject objToWrite = createJSONObject();
-        final String fileTitle = myPreference.getString("filename", "newFile");
-        saveFileToDrive(objToWrite, fileTitle);
+        final String fileTitle = retrieveTitle();
+        if(fileTitle != null && connected && mGoogleApiClient.isConnected()) {
+            saveFileToDrive(objToWrite, fileTitle);
+            Toast.makeText(this, "Pushed to Google Drive as " + fileTitle + ".json", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void pullButton(View view) {
         // Connect to Drive server
-        // Need separate thread for connecting and downloading JSON
+        connected = checkForNetworkConnectivity();
+        final String fileTitle = retrieveTitle();
+        if(fileTitle != null && connected && mGoogleApiClient.isConnected()) {
+            readFileFromDrive(fileTitle);
+            Toast.makeText(this, "Pulled from " + fileTitle + ".json", Toast.LENGTH_LONG).show();
+        }
+    }
 
-
-        // TODO -- Read contents of file at Drive location into string, insert string into method below
-        readFileFromDrive();
+    private String retrieveTitle() {
+        String fileTitle = myPreference.getString("filename", "");
+        if(fileTitle.equals("")) {
+            Toast.makeText(this, "File Name not set in Settings", Toast.LENGTH_LONG).show();
+            Intent myIntent = new Intent(this, SettingsActivity.class);
+            startActivity(myIntent);
+            return null;
+        }
+        else
+            return fileTitle;
     }
 
     private void changeDriveAccount() {
-        Log.d("Preferences", "Clicked Drive Account");
+        Log.e("Preferences", "Clicked Drive Account");
         // TODO -- Code required here for changing the current Drive account from Settings
+        mGoogleApiClient.clearDefaultAccountAndReconnect();
     }
 
-    public void readFileFromDrive() {
-
-        Query query = new Query.Builder().addFilter(Filters.eq(SearchableField.MIME_TYPE,"application/json")).build();
+    public void readFileFromDrive(final String fileTitle) {
+        Query query = new Query.Builder().addFilter(Filters.and(
+                Filters.eq(SearchableField.MIME_TYPE, "application/json"),
+                Filters.eq(SearchableField.TITLE, fileTitle + ".json"))).build();
         Drive.DriveApi.query(mGoogleApiClient,query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
             @Override
             public void onResult(@NonNull DriveApi.MetadataBufferResult metadataBufferResult) {
@@ -218,12 +230,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             MainActivity.this).execute(buffer.getDriveId());
                     break;
                 }
-
             }
         });
-
-
-
     }
 
     final private ResultCallback<DriveIdResult> idCallback = new ResultCallback<DriveIdResult>() {
@@ -233,12 +241,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     MainActivity.this).execute(result.getDriveId());
         }
     };
-
-
-
-    public GoogleApiClient getGoogleApiClient() {
-        return mGoogleApiClient;
-    }
 
     private void saveFileToDrive(final JSONObject objToWrite, final String fileTitle) {
         // Start by creating a new contents, and setting a callback.
@@ -268,18 +270,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         // Note that the user will be able to change the title later.
                         MetadataChangeSet metadataChangeSet = new MetadataChangeSet.Builder()
                                 .setMimeType("application/json").setTitle(fileTitle + ".json").build();
+                        Query query = new Query.Builder().addFilter(Filters.and(
+                                Filters.eq(SearchableField.MIME_TYPE, "application/json"),
+                                Filters.eq(SearchableField.TITLE, fileTitle + ".json"))).build();
+                        Drive.DriveApi.query(mGoogleApiClient,query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
+                            @Override
+                            public void onResult(@NonNull DriveApi.MetadataBufferResult metadataBufferResult) {
+                                for(Metadata buffer : metadataBufferResult.getMetadataBuffer()) {
+                                    if(buffer.isTrashable())
+                                        buffer.getDriveId().asDriveFile().trash(mGoogleApiClient);
+                                }
+                            }
+                        });
+                        Drive.DriveApi.getRootFolder(mGoogleApiClient)
+                                .createFile(mGoogleApiClient, metadataChangeSet, result.getDriveContents());
                         // Create an intent for the file chooser, and start it.
-                        IntentSender intentSender = Drive.DriveApi
-                                .newCreateFileActivityBuilder()
-                                .setInitialMetadata(metadataChangeSet)
-                                .setInitialDriveContents(result.getDriveContents())
-                                .build(mGoogleApiClient);
-                        try {
-                            startIntentSenderForResult(
-                                    intentSender, REQUEST_CODE_CREATOR, null, 0, 0, 0);
-                        } catch (IntentSender.SendIntentException e) {
-                            Log.i(TAG, "Failed to launch file chooser.");
-                        }
+//                        IntentSender intentSender = Drive.DriveApi
+//                                .newCreateFileActivityBuilder()
+//                                .setInitialMetadata(metadataChangeSet)
+//                                .setInitialDriveContents(result.getDriveContents())
+//                                .build(mGoogleApiClient);
+//                        try {
+//                            startIntentSenderForResult(
+//                                    intentSender, REQUEST_CODE_CREATOR, null, 0, 0, 0);
+//                        } catch (IntentSender.SendIntentException e) {
+//                            Log.i(TAG, "Failed to launch file chooser.");
+//                        }
                     }
                 });
     }
@@ -346,23 +362,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.i(TAG, "API client connected.");
-//        if (mBitmapToSave == null) {
-//        	// This activity has no UI of its own. Just start the camera.
-//            startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE),
-//                    REQUEST_CODE_CAPTURE_IMAGE);
-//            return;
-//        }
-//        saveFileToDrive();
-//        return;
     }
 
     @Override
     public void onConnectionSuspended(int cause) {
         Log.i(TAG, "GoogleApiClient connection suspended");
     }
-
-
-
 
     final private class RetrieveDriveFileContentsAsyncTask
             extends ApiClientAsyncTask<DriveId, Boolean, String> {
@@ -376,7 +381,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             String contents = null;
             DriveFile file = params[0].asDriveFile();
             DriveContentsResult driveContentsResult =
-                    file.open(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
+                    file.open(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, new DriveFile.DownloadProgressListener() {
+                        @Override
+                        public void onProgress(long l, long l1) {
+
+                        }
+                    }).await();
             if (!driveContentsResult.getStatus().isSuccess()) {
                 return null;
             }

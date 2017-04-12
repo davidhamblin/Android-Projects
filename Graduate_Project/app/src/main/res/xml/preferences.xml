@@ -6,7 +6,7 @@
         android:id="@+id/filename" />
 
     <Preference android:title="Drive Account"
-        android:key="drive_account"
+        android:key="@string/drive_account"
         android:summary="@string/drive_account"
         android:selectable="true" />
 
