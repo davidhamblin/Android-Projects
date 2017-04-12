@@ -14,6 +14,7 @@ import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi.DriveContentsResult;
 import com.google.android.gms.drive.DriveApi.DriveIdResult;
@@ -214,23 +215,29 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private void changeDriveAccount() {
         Log.e("Preferences", "Clicked Drive Account");
-        // TODO -- Code required here for changing the current Drive account from Settings
         mGoogleApiClient.clearDefaultAccountAndReconnect();
     }
 
     public void readFileFromDrive(final String fileTitle) {
-        Query query = new Query.Builder().addFilter(Filters.and(
-                Filters.eq(SearchableField.MIME_TYPE, "application/json"),
-                Filters.eq(SearchableField.TITLE, fileTitle + ".json"))).build();
-        Drive.DriveApi.query(mGoogleApiClient,query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
+        Drive.DriveApi.requestSync(mGoogleApiClient).setResultCallback(new ResultCallback<Status>() {
             @Override
-            public void onResult(@NonNull DriveApi.MetadataBufferResult metadataBufferResult) {
-                for (Metadata buffer : metadataBufferResult.getMetadataBuffer()){
-                    if(!buffer.isTrashed()) {
-                        new RetrieveDriveFileContentsAsyncTask(
-                                MainActivity.this).execute(buffer.getDriveId());
-                        break;
-                    }
+            public void onResult(@NonNull Status status) {
+                if(status.getStatus().isSuccess()) {
+                    Query query = new Query.Builder().addFilter(Filters.and(
+                            Filters.eq(SearchableField.MIME_TYPE, "application/json"),
+                            Filters.eq(SearchableField.TITLE, fileTitle + ".json"))).build();
+                    Drive.DriveApi.query(mGoogleApiClient,query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
+                        @Override
+                        public void onResult(@NonNull DriveApi.MetadataBufferResult metadataBufferResult) {
+                            for (Metadata buffer : metadataBufferResult.getMetadataBuffer()){
+                                if(!buffer.isTrashed()) {
+                                    new RetrieveDriveFileContentsAsyncTask(
+                                            MainActivity.this).execute(buffer.getDriveId());
+                                    break;
+                                }
+                            }
+                        }
+                    });
                 }
             }
         });
