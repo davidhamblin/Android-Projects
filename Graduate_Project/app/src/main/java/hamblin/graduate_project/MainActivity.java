@@ -226,9 +226,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onResult(@NonNull DriveApi.MetadataBufferResult metadataBufferResult) {
                 for (Metadata buffer : metadataBufferResult.getMetadataBuffer()){
-                    new RetrieveDriveFileContentsAsyncTask(
-                            MainActivity.this).execute(buffer.getDriveId());
-                    break;
+                    if(!buffer.isTrashed()) {
+                        new RetrieveDriveFileContentsAsyncTask(
+                                MainActivity.this).execute(buffer.getDriveId());
+                        break;
+                    }
                 }
             }
         });
