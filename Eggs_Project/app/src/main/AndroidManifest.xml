@@ -19,7 +19,7 @@
 
         <receiver android:name=".EggReceiver">
             <intent-filter>
-                <action android:name = "hamblin.receiver"/>
+                <action android:name = "hamblin.EGG_ACTION"/>
             </intent-filter>
         </receiver>
 
