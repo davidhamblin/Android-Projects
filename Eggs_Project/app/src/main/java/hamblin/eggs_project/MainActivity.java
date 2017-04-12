@@ -1,5 +1,6 @@
 package hamblin.eggs_project;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,21 +16,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchEggIntent(View view) {
+        Intent myIntent = new Intent("hamblin.EGG_ACTION");
         switch(view.getId()) {
             case R.id.button_add:
                 Toast.makeText(this, "Added One Egg", Toast.LENGTH_SHORT).show();
+                myIntent.putExtra("eggs", 1);
                 break;
             case R.id.button_add_two:
                 Toast.makeText(this, "Added Two Eggs", Toast.LENGTH_SHORT).show();
+                myIntent.putExtra("eggs", 2);
                 break;
             case R.id.button_subtract:
                 Toast.makeText(this, "Subtracted One Egg", Toast.LENGTH_SHORT).show();
+                myIntent.putExtra("eggs", -1);
                 break;
             case R.id.button_make:
                 Toast.makeText(this, "Made Breakfast", Toast.LENGTH_SHORT).show();
+                myIntent.putExtra("breakfast", true);
                 break;
             default:
                 break;
         }
+        sendBroadcast(myIntent);
     }
 }
