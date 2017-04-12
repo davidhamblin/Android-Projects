@@ -9,9 +9,18 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveApi.DriveContentsResult;
+import com.google.android.gms.drive.DriveApi.DriveIdResult;
+import com.google.android.gms.drive.DriveContents;
+import com.google.android.gms.drive.DriveFile;
+import com.google.android.gms.drive.DriveId;
 
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
@@ -32,15 +41,25 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi;
 
+import com.google.android.gms.drive.DriveFile;
+import com.google.android.gms.drive.DriveId;
+import com.google.android.gms.drive.Metadata;
+import com.google.android.gms.drive.MetadataBuffer;
 import com.google.android.gms.drive.MetadataChangeSet;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
+import com.google.android.gms.drive.query.Filters;
+import com.google.android.gms.drive.query.Query;
+import com.google.android.gms.drive.query.SearchableField;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.concurrent.CountDownLatch;
 
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
@@ -55,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int REQUEST_CODE_CAPTURE_IMAGE = 1;
     private static final int REQUEST_CODE_CREATOR = 2;
     private static final int REQUEST_CODE_RESOLUTION = 3;
+
+
 
     private GoogleApiClient mGoogleApiClient;
     private Bitmap mBitmapToSave;
@@ -78,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     changeDriveAccount();
             }
         };
+
     }
 
     @Override
@@ -105,11 +127,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     /**
      * Checks if the device is connected to a network, either data or WiFi
+     *
      * @return True if connected, false otherwise
      */
     private boolean checkForNetworkConnectivity() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if(cm.getActiveNetworkInfo() == null || !cm.getActiveNetworkInfo().isConnectedOrConnecting()) {
+        if (cm.getActiveNetworkInfo() == null || !cm.getActiveNetworkInfo().isConnectedOrConnecting()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Network Error")
                     .setMessage("No network connection detected")
@@ -173,16 +196,45 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void pullButton(View view) {
         // Connect to Drive server
         // Need separate thread for connecting and downloading JSON
-        Log.e("Help","Shit Should work");
+
 
         // TODO -- Read contents of file at Drive location into string, insert string into method below
-        extractStringFromJSON("{ \"text\": \"This IS A Test\" }");
+        readFileFromDrive();
     }
 
     private void changeDriveAccount() {
         Log.d("Preferences", "Clicked Drive Account");
         // TODO -- Code required here for changing the current Drive account from Settings
     }
+
+    public void readFileFromDrive() {
+
+        Query query = new Query.Builder().addFilter(Filters.eq(SearchableField.MIME_TYPE,"application/json")).build();
+        Drive.DriveApi.query(mGoogleApiClient,query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
+            @Override
+            public void onResult(@NonNull DriveApi.MetadataBufferResult metadataBufferResult) {
+                for (Metadata buffer : metadataBufferResult.getMetadataBuffer()){
+                    new RetrieveDriveFileContentsAsyncTask(
+                            MainActivity.this).execute(buffer.getDriveId());
+                    break;
+                }
+
+            }
+        });
+
+
+
+    }
+
+    final private ResultCallback<DriveIdResult> idCallback = new ResultCallback<DriveIdResult>() {
+        @Override
+        public void onResult(DriveIdResult result) {
+            new RetrieveDriveFileContentsAsyncTask(
+                    MainActivity.this).execute(result.getDriveId());
+        }
+    };
+
+
 
     public GoogleApiClient getGoogleApiClient() {
         return mGoogleApiClient;
@@ -196,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                     @Override
                     public void onResult(DriveApi.DriveContentsResult result) {
+
                         // If the operation was not successful, we cannot do anything
                         // and must fail.
                         if (!result.getStatus().isSuccess()) {
@@ -307,4 +360,115 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnectionSuspended(int cause) {
         Log.i(TAG, "GoogleApiClient connection suspended");
     }
+
+
+
+
+    final private class RetrieveDriveFileContentsAsyncTask
+            extends ApiClientAsyncTask<DriveId, Boolean, String> {
+
+        public RetrieveDriveFileContentsAsyncTask(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected String doInBackgroundConnected(DriveId... params) {
+            String contents = null;
+            DriveFile file = params[0].asDriveFile();
+            DriveContentsResult driveContentsResult =
+                    file.open(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
+            if (!driveContentsResult.getStatus().isSuccess()) {
+                return null;
+            }
+            DriveContents driveContents = driveContentsResult.getDriveContents();
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(driveContents.getInputStream()));
+            StringBuilder builder = new StringBuilder();
+            String line;
+            try {
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                }
+                contents = builder.toString();
+            } catch (IOException e) {
+                Log.e(TAG, "IOException while reading from the stream", e);
+            }
+
+            driveContents.discard(getGoogleApiClient());
+            return contents;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if (result == null) {
+                Log.e("onPostExecute","Error while reading from the file");
+                return;
+            }
+            extractStringFromJSON(result);
+        }
+    }
+    public abstract class ApiClientAsyncTask<Params, Progress, Result>
+            extends AsyncTask<Params, Progress, Result> {
+
+        private GoogleApiClient mClient;
+
+        public ApiClientAsyncTask(Context context) {
+            GoogleApiClient.Builder builder = new GoogleApiClient.Builder(context)
+                    .addApi(Drive.API)
+                    .addScope(Drive.SCOPE_FILE);
+            mClient = builder.build();
+        }
+
+        @Override
+        protected final Result doInBackground(Params... params) {
+            Log.d("TAG", "in background");
+            final CountDownLatch latch = new CountDownLatch(1);
+            mClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                @Override
+                public void onConnectionSuspended(int cause) {
+                }
+
+                @Override
+                public void onConnected(Bundle arg0) {
+                    latch.countDown();
+                }
+            });
+            mClient.registerConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                @Override
+                public void onConnectionFailed(ConnectionResult arg0) {
+                    latch.countDown();
+                }
+            });
+            mClient.connect();
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                return null;
+            }
+            if (!mClient.isConnected()) {
+                return null;
+            }
+            try {
+                return doInBackgroundConnected(params);
+            } finally {
+                mClient.disconnect();
+            }
+        }
+
+        /**
+         * Override this method to perform a computation on a background thread, while the client is
+         * connected.
+         */
+        protected abstract Result doInBackgroundConnected(Params... params);
+
+        /**
+         * Gets the GoogleApliClient owned by this async task.
+         */
+        protected GoogleApiClient getGoogleApiClient() {
+            return mClient;
+        }
+    }
+
+
 }
