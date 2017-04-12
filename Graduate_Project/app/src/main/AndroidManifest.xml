@@ -17,16 +17,17 @@
         <activity android:name=".MainActivity">
             % Client ID
             % 21433589374-3q298sp80ien0tvtp974pm3jr3n6ki41.apps.googleusercontent.com
-            <meta-data
-                android:name=" 252524887846-cbh332dt7mtoc295ms1s8c1j0eh7u3td.apps.googleusercontent.com "
-                android:value="@integer/google_play_services_version" />
+            % 252524887846-cbh332dt7mtoc295ms1s8c1j0eh7u3td.apps.googleusercontent.com
+            <!--<meta-data-->
+                <!--android:name="21433589374-3q298sp80ien0tvtp974pm3jr3n6ki41.apps.googleusercontent.com"-->
+                <!--android:value="@integer/google_play_services_version" />-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />
-                <data android:mimeType="application/vnd.google-apps.drive-sdk.420691337" />
                 <data android:mimeType="image/png" />
                 <data android:mimeType="image/jpeg" />
                 <data android:mimeType="image/jpg" />
+                <data android:mimeType="application/json" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private EditText editView;
 
-    final int RESOLVE_CONNECTION_REQUEST_CODE = 456;
     SharedPreferences myPreference;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
 
@@ -69,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         // Ask for permissions once the app first launches, so there are no crashes later
         // Necessary in Android 6.0 and above, with runtime permission checking :(
-        String[] permissionList = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        String[] permissionList = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_NETWORK_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.GET_ACCOUNTS};
         ActivityCompat.requestPermissions(this, permissionList, 123);
 
         myPreference = PreferenceManager.getDefaultSharedPreferences(this);
@@ -79,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     changeDriveAccount();
             }
         };
-
     }
 
     @Override
@@ -138,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         }).show();
             }
         });
-//        builder.setIcon(R.drawable.david);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -169,51 +166,38 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void pushButton(View view) {
         boolean connected = checkForNetworkConnectivity();
         final JSONObject objToWrite = createJSONObject();
-        final String fileTitle = myPreference.getString("drive_account", "newFile");
+        final String fileTitle = myPreference.getString("filename", "newFile");
+        saveFileToDrive(objToWrite, fileTitle);
     }
-
-/**
-        MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-                .setTitle("New file")
-                .setMimeType("text/plain")
-                .setStarred(true).build();
-
-        Drive.DriveApi.getRootFolder(getGoogleApiClient())
-                .createFile(getGoogleApiClient(), changeSet, null)
-                .setResultCallback(fileCallback);
-        **/
-
 
     public void pullButton(View view) {
         // Connect to Drive server
         // Need separate thread for connecting and downloading JSON
         Log.e("Help","Shit Should work");
 
-        // Read contents of file at Drive location into string, insert string into method below
+        // TODO -- Read contents of file at Drive location into string, insert string into method below
         extractStringFromJSON("{ \"text\": \"This IS A Test\" }");
     }
 
     private void changeDriveAccount() {
         Log.d("Preferences", "Clicked Drive Account");
-        Toast.makeText(this, "Suh", Toast.LENGTH_SHORT).show();
+        // TODO -- Code required here for changing the current Drive account from Settings
     }
 
     public GoogleApiClient getGoogleApiClient() {
         return mGoogleApiClient;
     }
 
-    private void saveFileToDrive() {
+    private void saveFileToDrive(final JSONObject objToWrite, final String fileTitle) {
         // Start by creating a new contents, and setting a callback.
         Log.i(TAG, "Creating new contents.");
-        final Bitmap image = mBitmapToSave;
         Drive.DriveApi.newDriveContents(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
 
                     @Override
                     public void onResult(DriveApi.DriveContentsResult result) {
                         // If the operation was not successful, we cannot do anything
-                        // and must
-                        // fail.
+                        // and must fail.
                         if (!result.getStatus().isSuccess()) {
                             Log.i(TAG, "Failed to create new contents.");
                             return;
@@ -222,18 +206,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         Log.i(TAG, "New contents created.");
                         // Get an output stream for the contents.
                         OutputStream outputStream = result.getDriveContents().getOutputStream();
-                        // Write the bitmap data from it.
-                        ByteArrayOutputStream bitmapStream = new ByteArrayOutputStream();
-                        image.compress(Bitmap.CompressFormat.PNG, 100, bitmapStream);
                         try {
-                            outputStream.write(bitmapStream.toByteArray());
+                            outputStream.write(objToWrite.toString().getBytes());
                         } catch (IOException e1) {
                             Log.i(TAG, "Unable to write file contents.");
                         }
                         // Create the initial metadata - MIME type and title.
                         // Note that the user will be able to change the title later.
                         MetadataChangeSet metadataChangeSet = new MetadataChangeSet.Builder()
-                                .setMimeType("image/jpeg").setTitle("Android Photo.png").build();
+                                .setMimeType("application/json").setTitle(fileTitle + ".json").build();
                         // Create an intent for the file chooser, and start it.
                         IntentSender intentSender = Drive.DriveApi
                                 .newCreateFileActivityBuilder()
@@ -280,21 +261,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         switch (requestCode) {
-            case REQUEST_CODE_CAPTURE_IMAGE:
-                // Called after a photo has been taken.
-                if (resultCode == Activity.RESULT_OK) {
-                    // Store the image data as a bitmap for writing later.
-                    mBitmapToSave = (Bitmap) data.getExtras().get("data");
-                }
-                break;
             case REQUEST_CODE_CREATOR:
                 // Called after a file is saved to Drive.
                 if (resultCode == RESULT_OK) {
-                    Log.i(TAG, "Image successfully saved.");
-                    mBitmapToSave = null;
-                    // Just start the camera again for another photo.
-                    startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE),
-                            REQUEST_CODE_CAPTURE_IMAGE);
+                    Log.i(TAG, "JSON successfully saved.");
                 }
                 break;
         }
@@ -323,13 +293,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.i(TAG, "API client connected.");
-        if (mBitmapToSave == null) {
-        	// This activity has no UI of its own. Just start the camera.
-            startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE),
-                    REQUEST_CODE_CAPTURE_IMAGE);
-            return;
-        }
-        saveFileToDrive();
+//        if (mBitmapToSave == null) {
+//        	// This activity has no UI of its own. Just start the camera.
+//            startActivityForResult(new Intent(MediaStore.ACTION_IMAGE_CAPTURE),
+//                    REQUEST_CODE_CAPTURE_IMAGE);
+//            return;
+//        }
+//        saveFileToDrive();
+//        return;
     }
 
     @Override
