@@ -23,9 +23,10 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
 
     // 3 second timeout
     private static final int TIMEOUT = 3000;
-    private String myQuery = "bikes.json";
+    private String myQuery;
 
-    DownloadTask(MainActivity activity) {
+    DownloadTask(MainActivity activity, String query) {
+        myQuery = query + ".json";
         attach(activity);
     }
 

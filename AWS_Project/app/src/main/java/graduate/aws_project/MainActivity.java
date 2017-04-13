@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
         // TODO -- Amazon address and port pulled from Preferences
         // TODO -- Pumped into ASyncTask, connect to server, pull down file
         connectToAmazon();
+        new SaveTask(this,"student","student","test",objToWrite).execute("ec2-34-201-19-233.compute-1.amazonaws.com");
         // Create file, save to location, disconnect
     }
 

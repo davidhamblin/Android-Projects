@@ -4,10 +4,25 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPSClient;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -15,7 +30,7 @@ import java.net.URLEncoder;
  * @author david
  *
  */
-public class SaveTask extends AsyncTask<String, Void, String> {
+public class SaveTask extends AsyncTask<String, Void, Void> {
 
     private static final String TAG = "DownloadTask";
     private static final int BUFFER_SIZE = 8096;
@@ -24,9 +39,18 @@ public class SaveTask extends AsyncTask<String, Void, String> {
     // 3 second timeout
     private static final int TIMEOUT = 3000;
     private String myQuery = "bikes.json";
+    private String USERNAME;
+    private String PASSWORD;
+    private String FILE_NAME;
+    private JSONObject FILE_CONTENTS;
 
-    SaveTask(MainActivity activity) {
+
+    SaveTask(MainActivity activity,String username, String password, String file_name, JSONObject file_contents) {
         attach(activity);
+        USERNAME = username;
+        PASSWORD = password;
+        FILE_NAME = file_name;
+        FILE_CONTENTS = file_contents;
     }
 
     //
@@ -57,69 +81,53 @@ public class SaveTask extends AsyncTask<String, Void, String> {
     }
 
     @Override
-    protected String doInBackground(String... params) {
-        
-        // site we want to connect to
-        String myURL = params[0];
+    protected Void doInBackground(String... params) {
+        String server = params[0];
+        try{
+            JSch jsch = new JSch();
+            Session session = jsch.getSession(USERNAME,server,22);
+            session.setConfig("PreferredAuthentications","password");
+            session.setPassword(PASSWORD);
+            session.connect();
+            Channel channel = session.openChannel("sftp");
+            ChannelSftp sftp = (ChannelSftp) channel;
+            sftp.connect();
 
-        try {
-            URL url = new URL(myURL + myQuery);
 
-            // this does no network IO
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            FTPSClient client = new FTPSClient();
+            client.connect(server, 22);
+            //Log.e("Client", ""+client.getReplyCode());
+            client.login(USERNAME,PASSWORD);
+            client.changeWorkingDirectory("/var/www/html/"); //Set server path here
 
-            // can further configure connection before getting data
-            // cannot do this after connected
-            connection.setRequestMethod("GET");
-            connection.setReadTimeout(TIMEOUT);
-            connection.setConnectTimeout(TIMEOUT);
-            connection.setRequestProperty("Accept-Charset", "UTF-8");
-            // this opens a connection, then sends GET & headers
 
-            // wrap in finally so that stream bis is sure to close
-            // and we disconnect the HttpURLConnection
-            BufferedReader in = null;
-            try {
-                connection.connect();
+            File file = new File(FILE_NAME+".json");
 
-                // lets see what we got make sure its one of
-                // the 200 codes (there can be 100 of them
-                // http_status / 100 != 2 does integer div any 200 code will = 2
-                int statusCode = connection.getResponseCode();
-                if (statusCode / 100 != 2) {
-                    Log.e(TAG, "Error-connection.getResponseCode returned "
-                            + Integer.toString(statusCode));
-                    return null;
-                }
+            OutputStream out = new FileOutputStream(file);
+            out.write(FILE_CONTENTS.toString().getBytes());
+            out.close();
 
-                in = new BufferedReader(new InputStreamReader(connection.getInputStream()), 8096);
+            Log.e("File", file.toString());
 
-                // the following buffer will grow as needed
-                String myData;
-                StringBuffer sb = new StringBuffer();
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+            client.enterLocalPassiveMode();
+            client.storeFile(FILE_NAME+".json", in);
 
-                while ((myData = in.readLine()) != null) {
-                    sb.append(myData);
-                }
-                return sb.toString();
+            in.close();
+            client.logout();
+            client.disconnect();
 
-            } finally {
-                // close resource no matter what exception occurs
-                if(in != null) in.close();
-                connection.disconnect();
-            }
-        } catch (Exception exc) {
-            exc.printStackTrace();
-            return null;
+
         }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+
     }
 
     @Override
-    protected void onPostExecute(String result) {
-        if(result != null)
-            myActivity.extractStringFromJSON(result);
-        else
-            Toast.makeText(myActivity, "Could not connect to server", Toast.LENGTH_LONG).show();
+    protected void onPostExecute(Void result) {
     }
 
     /*

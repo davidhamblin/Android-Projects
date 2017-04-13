@@ -223,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onResult(@NonNull Status status) {
                 if(status.getStatus().isSuccess()) {
+                    Log.e("Help", "in the onResult");
                     Query query = new Query.Builder().addFilter(Filters.and(
                             Filters.eq(SearchableField.MIME_TYPE, "application/json"),
                             Filters.eq(SearchableField.TITLE, fileTitle + ".json"))).build();
