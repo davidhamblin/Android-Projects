@@ -15,7 +15,7 @@ import java.net.URLEncoder;
  * @author david
  *
  */
-public class DownloadTask extends AsyncTask<String, Void, String> {
+public class SaveTask extends AsyncTask<String, Void, String> {
 
     private static final String TAG = "DownloadTask";
     private static final int BUFFER_SIZE = 8096;
@@ -25,7 +25,7 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
     private static final int TIMEOUT = 3000;
     private String myQuery = "bikes.json";
 
-    DownloadTask(MainActivity activity) {
+    SaveTask(MainActivity activity) {
         attach(activity);
     }
 
@@ -38,7 +38,7 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
      *         "value1").setnameValuePair("param2",
      *         "value2").setnameValuePair("param3", "value3")....
      */
-    public DownloadTask setnameValuePair(String name, String value) {
+    public SaveTask setnameValuePair(String name, String value) {
         try {
             if (name.length() != 0 && value.length() != 0) {
 
@@ -58,8 +58,7 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected String doInBackground(String... params) {
-
-
+        
         // site we want to connect to
         String myURL = params[0];
 
