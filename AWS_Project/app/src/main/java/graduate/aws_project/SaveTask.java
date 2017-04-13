@@ -15,16 +15,20 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author david
@@ -86,36 +90,41 @@ public class SaveTask extends AsyncTask<String, Void, Void> {
         try{
             JSch jsch = new JSch();
             Session session = jsch.getSession(USERNAME,server,22);
-            session.setConfig("PreferredAuthentications","password");
+            session.setConfig("StrictHostKeyChecking", "no");
             session.setPassword(PASSWORD);
             session.connect();
             Channel channel = session.openChannel("sftp");
             ChannelSftp sftp = (ChannelSftp) channel;
             sftp.connect();
+            sftp.cd("/var/www/html/");
+
+            InputStream stream = new ByteArrayInputStream(FILE_CONTENTS.toString().getBytes(StandardCharsets.UTF_8));
+
+            sftp.put(stream,FILE_NAME+".json");
 
 
-            FTPSClient client = new FTPSClient();
-            client.connect(server, 22);
-            //Log.e("Client", ""+client.getReplyCode());
-            client.login(USERNAME,PASSWORD);
-            client.changeWorkingDirectory("/var/www/html/"); //Set server path here
+//            FTPSClient client = new FTPSClient();
+//            client.connect(server, 22);
+//            //Log.e("Client", ""+client.getReplyCode());
+//            client.login(USERNAME,PASSWORD);
+//            client.changeWorkingDirectory("/var/www/html/"); //Set server path here
+//
+//
+//            File file = new File(FILE_NAME+".json");
+//
+//            OutputStream out = new FileOutputStream(file);
+//            out.write(FILE_CONTENTS.toString().getBytes());
+//            out.close();
+//
+//            Log.e("File", file.toString());
+//
+//            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+//            client.enterLocalPassiveMode();
+//            client.storeFile(FILE_NAME+".json", in);
 
-
-            File file = new File(FILE_NAME+".json");
-
-            OutputStream out = new FileOutputStream(file);
-            out.write(FILE_CONTENTS.toString().getBytes());
-            out.close();
-
-            Log.e("File", file.toString());
-
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
-            client.enterLocalPassiveMode();
-            client.storeFile(FILE_NAME+".json", in);
-
-            in.close();
-            client.logout();
-            client.disconnect();
+            stream.close();
+            sftp.disconnect();
+            sftp.exit();
 
 
         }
