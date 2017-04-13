@@ -127,40 +127,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void pushButton(View view) {
+    public void pushPull(View view) {
         connected = checkForNetworkConnectivity();
-        final JSONObject objToWrite = createJSONObject();
         final String fileTitle = retrieveTitle();
-        if(fileTitle != null && connected) {
-            saveFileToAmazon(objToWrite, fileTitle);
-            Toast.makeText(this, "Pushed to Amazon as " + fileTitle + ".json", Toast.LENGTH_LONG).show();
+        // Port and address retrieved
+        final String address = retrieveAddress();
+        final int port = myPreference.getInt("port", 0);
+        if(fileTitle != null && address != null && connected) {
+            switch (view.getId()) {
+                case R.id.push_button:
+                    final JSONObject objToWrite = createJSONObject();
+                    saveFileToAmazon(objToWrite, fileTitle, address, port);
+                    break;
+                case R.id.pull_button:
+                    readFileFromAmazon(fileTitle, address);
+                    Toast.makeText(this, "Pulled from " + fileTitle + ".json", Toast.LENGTH_LONG).show();
+                    break;
+            }
         }
     }
 
-    private void saveFileToAmazon(JSONObject objToWrite, String fileTitle) {
+    private String retrieveAddress() {
+        String address = myPreference.getString("address", "");
+        if(address.isEmpty())
+            return null;
+        else
+            return address;
+    }
+
+    private void saveFileToAmazon(JSONObject objToWrite, String fileTitle, String address, int port) {
         // TODO -- Amazon address and port pulled from Preferences
-        // TODO -- Pumped into ASyncTask, connect to server, pull down file
-        new SaveTask(this,"student","student",fileTitle,objToWrite).execute("ec2-34-201-19-233.compute-1.amazonaws.com");
-        // Create file, save to location, disconnect
+        new SaveTask(this, "student", "student", fileTitle, port, objToWrite).execute(address);
     }
 
-    public void pullButton(View view) {
-        // Connect to Drive server
-        connected = checkForNetworkConnectivity();
-        final String fileTitle = retrieveTitle();
-        if(fileTitle != null && connected) {
-            readFileFromAmazon(fileTitle);
-            Toast.makeText(this, "Pulled from " + fileTitle + ".json", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void readFileFromAmazon(String fileTitle) {
+    private void readFileFromAmazon(String fileTitle, String address) {
         // Read contents of file, disconnect
-        new DownloadTask(this,fileTitle).execute("http://ec2-34-201-19-233.compute-1.amazonaws.com/");
-    }
-
-    private void connectToAmazon() {
-        // Launch ASyncTask to access server, take from Bikes Project
+        new DownloadTask(this,fileTitle).execute("http://" + address + "/");
     }
 
     private String retrieveTitle() {

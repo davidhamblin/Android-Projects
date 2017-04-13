@@ -34,7 +34,7 @@ import java.nio.charset.StandardCharsets;
  * @author david
  *
  */
-public class SaveTask extends AsyncTask<String, Void, Void> {
+public class SaveTask extends AsyncTask<String, Void, Boolean> {
 
     private static final String TAG = "DownloadTask";
     private static final int BUFFER_SIZE = 8096;
@@ -47,14 +47,16 @@ public class SaveTask extends AsyncTask<String, Void, Void> {
     private String PASSWORD;
     private String FILE_NAME;
     private JSONObject FILE_CONTENTS;
+    private int PORT:
 
 
-    SaveTask(MainActivity activity,String username, String password, String file_name, JSONObject file_contents) {
+    SaveTask(MainActivity activity,String username, String password, String file_name, int port, JSONObject file_contents) {
         attach(activity);
         USERNAME = username;
         PASSWORD = password;
         FILE_NAME = file_name;
         FILE_CONTENTS = file_contents;
+        PORT = port;
     }
 
     //
@@ -85,11 +87,11 @@ public class SaveTask extends AsyncTask<String, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(String... params) {
+    protected Boolean doInBackground(String... params) {
         String server = params[0];
         try{
             JSch jsch = new JSch();
-            Session session = jsch.getSession(USERNAME,server,22);
+            Session session = jsch.getSession(USERNAME, server, PORT);
             session.setConfig("StrictHostKeyChecking", "no");
             session.setPassword(PASSWORD);
             session.connect();
@@ -102,26 +104,6 @@ public class SaveTask extends AsyncTask<String, Void, Void> {
 
             sftp.put(stream,FILE_NAME+".json");
 
-
-//            FTPSClient client = new FTPSClient();
-//            client.connect(server, 22);
-//            //Log.e("Client", ""+client.getReplyCode());
-//            client.login(USERNAME,PASSWORD);
-//            client.changeWorkingDirectory("/var/www/html/"); //Set server path here
-//
-//
-//            File file = new File(FILE_NAME+".json");
-//
-//            OutputStream out = new FileOutputStream(file);
-//            out.write(FILE_CONTENTS.toString().getBytes());
-//            out.close();
-//
-//            Log.e("File", file.toString());
-//
-//            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
-//            client.enterLocalPassiveMode();
-//            client.storeFile(FILE_NAME+".json", in);
-
             stream.close();
             sftp.disconnect();
             sftp.exit();
@@ -130,13 +112,18 @@ public class SaveTask extends AsyncTask<String, Void, Void> {
         }
         catch (Exception e){
             e.printStackTrace();
+            return false;
         }
-        return null;
+        return true;
 
     }
 
     @Override
-    protected void onPostExecute(Void result) {
+    protected void onPostExecute(Boolean result) {
+        if(result)
+            Toast.makeText(myActivity, "Successfully pushed to Amazon as " + FILE_NAME + ".json", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(myActivity, "Failed to push to Amazon as " + FILE_NAME + ".json", Toast.LENGTH_LONG).show();
     }
 
     /*

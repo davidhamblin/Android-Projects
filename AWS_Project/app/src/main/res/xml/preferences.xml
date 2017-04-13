@@ -6,13 +6,24 @@
         android:id="@+id/filename" />
 
     <EditTextPreference android:title="Address"
-        android:summary="Address Accessed on Amazon Server"
+        android:summary="Address to access on Amazon server"
         android:key="address"
+        android:defaultValue="ec2-34-201-19-233.compute-1.amazonaws.com"
         android:id="@+id/address" />
 
     <EditTextPreference android:title="Port"
-        android:summary="Port of Address Accessed on Amazon Server"
+        android:summary="Port of Address to access on Amazon server"
         android:key="port"
         android:id="@+id/port" />
+
+    <EditTextPreference android:title="Username"
+        android:summary="Username to access Amazon server"
+        android:key="username"
+        android:id="@+id/username" />
+
+    <EditTextPreference android:title="Password"
+        android:summary="Password for Username to access Amazon server"
+        android:key="password"
+        android:id="@+id/password" />
 
 </PreferenceScreen>
