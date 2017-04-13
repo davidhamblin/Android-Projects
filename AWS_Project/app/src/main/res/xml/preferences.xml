@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference android:title="File Name"
-        android:summary="Name of File Accessed on Drive Server"
+        android:summary="Name of File Accessed on Amazon Server"
         android:key="filename"
         android:id="@+id/filename" />
+
+    <EditTextPreference android:title="Address"
+        android:summary="Address Accessed on Amazon Server"
+        android:key="address"
+        android:id="@+id/address" />
+
+    <EditTextPreference android:title="Port"
+        android:summary="Port of Address Accessed on Amazon Server"
+        android:key="port"
+        android:id="@+id/port" />
 
 </PreferenceScreen>
