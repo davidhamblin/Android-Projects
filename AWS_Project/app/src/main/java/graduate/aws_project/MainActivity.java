@@ -140,8 +140,7 @@ public class MainActivity extends AppCompatActivity {
     private void saveFileToAmazon(JSONObject objToWrite, String fileTitle) {
         // TODO -- Amazon address and port pulled from Preferences
         // TODO -- Pumped into ASyncTask, connect to server, pull down file
-        connectToAmazon();
-        new SaveTask(this,"student","student","test",objToWrite).execute("ec2-34-201-19-233.compute-1.amazonaws.com");
+        new SaveTask(this,"student","student",fileTitle,objToWrite).execute("ec2-34-201-19-233.compute-1.amazonaws.com");
         // Create file, save to location, disconnect
     }
 
@@ -156,8 +155,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void readFileFromAmazon(String fileTitle) {
-        connectToAmazon();
         // Read contents of file, disconnect
+        new DownloadTask(this,fileTitle).execute("http://ec2-34-201-19-233.compute-1.amazonaws.com/");
     }
 
     private void connectToAmazon() {
