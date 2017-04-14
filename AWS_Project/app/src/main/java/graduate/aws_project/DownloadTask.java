@@ -6,19 +6,12 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 
-/**
- * @author david
- *
- */
 public class DownloadTask extends AsyncTask<String, Void, String> {
 
     private static final String TAG = "DownloadTask";
-    private static final int BUFFER_SIZE = 8096;
     private MainActivity myActivity;
 
     // 3 second timeout
@@ -30,37 +23,8 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
         attach(activity);
     }
 
-    //
-    /**
-     * @param name
-     * @param value
-     * @return this allows you to build a safe URL with all spaces and illegal
-     *         characters URLEncoded usage mytask.setnameValuePair("param1",
-     *         "value1").setnameValuePair("param2",
-     *         "value2").setnameValuePair("param3", "value3")....
-     */
-    public DownloadTask setnameValuePair(String name, String value) {
-        try {
-            if (name.length() != 0 && value.length() != 0) {
-
-                // if 1st pair that include ? otherwise use the joiner char &
-                if (myQuery.length() == 0)
-                    myQuery += "?";
-                else
-                    myQuery += "&";
-
-                myQuery += name + "=" + URLEncoder.encode(value, "utf-8");
-            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return this;
-    }
-
     @Override
     protected String doInBackground(String... params) {
-
-
         // site we want to connect to
         String myURL = params[0];
 
@@ -118,10 +82,12 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        if(result != null)
+        if(result != null) {
             myActivity.extractStringFromJSON(result);
+            Toast.makeText(myActivity, "Pulled from " + myQuery, Toast.LENGTH_LONG).show();
+        }
         else
-            Toast.makeText(myActivity, "Could not connect to server", Toast.LENGTH_LONG).show();
+            Toast.makeText(myActivity, "Could not find file " + myQuery + " or connect to server", Toast.LENGTH_LONG).show();
     }
 
     /*

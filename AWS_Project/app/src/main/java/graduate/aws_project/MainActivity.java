@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
@@ -24,10 +25,8 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     private EditText editView;
-    private boolean connected;
 
     SharedPreferences myPreference;
-    SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,17 +122,17 @@ public class MainActivity extends AppCompatActivity {
             editView.setText(newText);
         } catch (JSONException e) {
             e.printStackTrace();
+            Toast.makeText(this, "Invalid JSON file", Toast.LENGTH_SHORT).show();
             Log.e("extractStringFromJSON", "Invalid JSON file");
         }
     }
 
     public void pushPull(View view) {
-        connected = checkForNetworkConnectivity();
+        boolean connected = checkForNetworkConnectivity();
         final String fileTitle = retrieveTitle();
-        // Port and address retrieved
         final String address = retrieveAddress();
-        final int port = myPreference.getInt("port", 0);
-        if(fileTitle != null && address != null && connected) {
+        final int port = retrievePort();
+        if(fileTitle != null && address != null && port != 0 && connected) {
             switch (view.getId()) {
                 case R.id.push_button:
                     final JSONObject objToWrite = createJSONObject();
@@ -141,39 +140,76 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.pull_button:
                     readFileFromAmazon(fileTitle, address);
-                    Toast.makeText(this, "Pulled from " + fileTitle + ".json", Toast.LENGTH_LONG).show();
                     break;
             }
         }
     }
 
-    private String retrieveAddress() {
-        String address = myPreference.getString("address", "");
-        if(address.isEmpty())
-            return null;
-        else
-            return address;
-    }
-
     private void saveFileToAmazon(JSONObject objToWrite, String fileTitle, String address, int port) {
-        // TODO -- Amazon address and port pulled from Preferences
-        new SaveTask(this, "student", "student", fileTitle, port, objToWrite).execute(address);
+        final String username = retrieveUsername();
+        final String password = retrievePassword();
+        if(username != null && password != null)
+            new SaveTask(this, username, password, fileTitle, port, objToWrite).execute(address);
     }
 
     private void readFileFromAmazon(String fileTitle, String address) {
-        // Read contents of file, disconnect
-        new DownloadTask(this,fileTitle).execute("http://" + address + "/");
+        new DownloadTask(this, fileTitle).execute("http://" + address + "/");
     }
 
+    private void openSettingsIfMissingInfo(String missing) {
+        Toast.makeText(this, missing + " not set in Settings", Toast.LENGTH_LONG).show();
+        Intent myIntent = new Intent(this, SettingsActivity.class);
+        startActivity(myIntent);
+    }
+
+    @Nullable
     private String retrieveTitle() {
         String fileTitle = myPreference.getString("filename", "");
-        if(fileTitle.equals("")) {
-            Toast.makeText(this, "File Name not set in Settings", Toast.LENGTH_LONG).show();
-            Intent myIntent = new Intent(this, SettingsActivity.class);
-            startActivity(myIntent);
+        if(fileTitle.isEmpty()) {
+            openSettingsIfMissingInfo("File Name");
             return null;
         }
         else
             return fileTitle;
+    }
+
+    @Nullable
+    private String retrieveAddress() {
+        String address = myPreference.getString("address", "");
+        if(address.isEmpty()) {
+            openSettingsIfMissingInfo("Address");
+            return null;
+        }
+        else
+            return address;
+    }
+
+    private int retrievePort() {
+        int port = Integer.valueOf(myPreference.getString("port", "0"));
+        if(port == 0)
+            openSettingsIfMissingInfo("Port");
+        return port;
+    }
+
+    @Nullable
+    private String retrieveUsername() {
+        String username = myPreference.getString("username", "");
+        if(username.isEmpty()) {
+            openSettingsIfMissingInfo("Username");
+            return null;
+        }
+        else
+            return username;
+    }
+
+    @Nullable
+    private String retrievePassword() {
+        String password = myPreference.getString("password", "");
+        if(password.isEmpty()) {
+            openSettingsIfMissingInfo("Password");
+            return null;
+        }
+        else
+            return password;
     }
 }
