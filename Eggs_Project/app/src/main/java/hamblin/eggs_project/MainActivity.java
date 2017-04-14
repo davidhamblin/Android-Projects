@@ -1,6 +1,8 @@
 package hamblin.eggs_project;
 
+import android.Manifest;
 import android.content.Intent;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -8,22 +10,22 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static int egg_count = Constants.MIN_EGG_COUNT;
-
-    public static void setEggCount(int eggCount) {
-        egg_count = eggCount;
-    }
-
-    public static int getEggCount() {
-        return egg_count;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Ask for permissions once the app first launches, so there are no crashes later
+        // Necessary in Android 6.0 and above, with runtime permission checking :(
+        String[] permissionList = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        ActivityCompat.requestPermissions(this, permissionList, Constants.PERMISSION_REQUEST);
     }
 
+    /**
+     * onClick handler for every button, putting different extras into an Intent depending on the view
+     * Launches a broadcast receiver intent with eggs to add/remove, or make breakfast.
+     * @param view Button clicked in activity_main.xml
+     */
     public void launchEggIntent(View view) {
         Intent myIntent = new Intent("hamblin.EGG_ACTION");
         switch(view.getId()) {
@@ -43,10 +45,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Made Breakfast", Toast.LENGTH_SHORT).show();
                 myIntent.putExtra("breakfast", true);
                 myIntent.putExtra("eggs", Constants.MAKE_BREAKFAST_EGG_COUNT);
-                break;
-            case R.id.button_reset:
-                Toast.makeText(this, "Service Stopped", Toast.LENGTH_SHORT).show();
-                myIntent.putExtra("stop", true);
                 break;
             default:
                 break;
