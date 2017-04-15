@@ -18,11 +18,21 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
     private static final int TIMEOUT = 3000;
     private String myQuery;
 
+    /**
+     * Constructor to set the filename and extension to download
+     * @param activity MainActivity instance
+     * @param query Filename to access on the server
+     */
     DownloadTask(MainActivity activity, String query) {
         myQuery = query + ".json";
         attach(activity);
     }
 
+    /**
+     * Opens and downloads the contents of the file from the server using HTTP
+     * @param params Address to access Amazon server
+     * @return Contents of the file or null if there is an issue
+     */
     @Override
     protected String doInBackground(String... params) {
         // site we want to connect to
@@ -80,6 +90,10 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
         }
     }
 
+    /**
+     * Sets the EditText of MainActivity to the extracted string in result, or warns the user of an issue
+     * @param result String contents of the downloaded JSON file, or null if there was an issue
+     */
     @Override
     protected void onPostExecute(String result) {
         if(result != null) {

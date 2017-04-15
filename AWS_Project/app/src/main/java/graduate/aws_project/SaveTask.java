@@ -26,7 +26,15 @@ public class SaveTask extends AsyncTask<String, Void, Boolean> {
     private JSONObject FILE_CONTENTS;
     private int PORT;
 
-
+    /**
+     * Constructor to set global variables for the thread
+     * @param activity MainActivity instance
+     * @param username Username to access the server
+     * @param password Password to access the server
+     * @param file_name Filename to save on the server
+     * @param port Port to access the server, SFTP uses 22
+     * @param file_contents JSONObject to write to file
+     */
     SaveTask(MainActivity activity, String username, String password, String file_name, int port, JSONObject file_contents) {
         attach(activity);
         USERNAME = username;
@@ -36,6 +44,11 @@ public class SaveTask extends AsyncTask<String, Void, Boolean> {
         PORT = port;
     }
 
+    /**
+     * Creates an FTP client to connect to the Amazon server and create the JSON file
+     * @param params Address of the Amazon server
+     * @return True if successfully connected and created the file, false otherwise
+     */
     @Override
     protected Boolean doInBackground(String... params) {
         String server = params[0];
@@ -65,6 +78,10 @@ public class SaveTask extends AsyncTask<String, Void, Boolean> {
 
     }
 
+    /**
+     * Makes a Toast depending on the success/failure of the thread connecting to and creating a file
+     * @param result True if successful, false if there was an error
+     */
     @Override
     protected void onPostExecute(Boolean result) {
         if(result)

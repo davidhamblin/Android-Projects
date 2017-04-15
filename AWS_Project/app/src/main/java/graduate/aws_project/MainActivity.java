@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Checks if the device is connected to a network, either data or WiFi
-     *
      * @return True if connected, false otherwise
      */
     private boolean checkForNetworkConnectivity() {
@@ -84,6 +83,9 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Informs the user about the two chill dudes who created this project
+     */
     private void showAbout() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("David Hamblin & Jake Hayhurst")
@@ -104,6 +106,10 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    /**
+     * Creates a JSON object from the EditText view, for storage on the server
+     * @return JSONObject with one item as {"text": value}
+     */
     public JSONObject createJSONObject() {
         JSONObject textToPush = new JSONObject();
         String enteredText = editView.getText().toString();
@@ -115,6 +121,10 @@ public class MainActivity extends AppCompatActivity {
         return textToPush;
     }
 
+    /**
+     * Takes the string form of a JSON object and extracts the value, placing in the EditText view
+     * @param stringToExtract String of a JSON file
+     */
     public void extractStringFromJSON(String stringToExtract) {
         try {
             JSONObject extractedString = new JSONObject(stringToExtract);
@@ -127,6 +137,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Button listener for Push/Pull, calls specific methods for saving and loading from the Amazon server
+     * @param view The button pressed in the main activity
+     */
     public void pushPull(View view) {
         boolean connected = checkForNetworkConnectivity();
         final String fileTitle = retrieveTitle();
@@ -145,6 +159,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Calls an ASyncTask for connecting to and saving a file to the Amazon server
+     * @param objToWrite JSONObject to write on the server
+     * @param fileTitle Name of file to save
+     * @param address Address of the Amazon server
+     * @param port Port to access on the Amazon server (22 for FTP)
+     */
     private void saveFileToAmazon(JSONObject objToWrite, String fileTitle, String address, int port) {
         final String username = retrieveUsername();
         final String password = retrievePassword();
@@ -152,16 +173,29 @@ public class MainActivity extends AppCompatActivity {
             new SaveTask(this, username, password, fileTitle, port, objToWrite).execute(address);
     }
 
+    /**
+     * Calls an ASyncTask to connect and load a JSON file from the server
+     * @param fileTitle Name of file to load
+     * @param address Address of the Amazon server (HTTP connection, port is 80)
+     */
     private void readFileFromAmazon(String fileTitle, String address) {
         new DownloadTask(this, fileTitle).execute("http://" + address + "/");
     }
 
+    /**
+     * Starts the Settings activity if trying to push or pull with missing information
+     * @param missing Item missing information in Settings
+     */
     private void openSettingsIfMissingInfo(String missing) {
         Toast.makeText(this, missing + " not set in Settings", Toast.LENGTH_LONG).show();
         Intent myIntent = new Intent(this, SettingsActivity.class);
         startActivity(myIntent);
     }
 
+    /**
+     * Returns the filename from the Settings, or opens Settings if it missing
+     * @return Filename
+     */
     @Nullable
     private String retrieveTitle() {
         String fileTitle = myPreference.getString("filename", "");
@@ -173,6 +207,10 @@ public class MainActivity extends AppCompatActivity {
             return fileTitle;
     }
 
+    /**
+     * Returns the address from the Settings, or opens Settings if it missing
+     * @return Address
+     */
     @Nullable
     private String retrieveAddress() {
         String address = myPreference.getString("address", "");
@@ -184,6 +222,10 @@ public class MainActivity extends AppCompatActivity {
             return address;
     }
 
+    /**
+     * Returns the port from the Settings, or opens Settings if it missing
+     * @return Port
+     */
     private int retrievePort() {
         int port = Integer.valueOf(myPreference.getString("port", "0"));
         if(port == 0)
@@ -191,6 +233,10 @@ public class MainActivity extends AppCompatActivity {
         return port;
     }
 
+    /**
+     * Returns the username from the Settings, or opens Settings if it missing
+     * @return Username
+     */
     @Nullable
     private String retrieveUsername() {
         String username = myPreference.getString("username", "");
@@ -202,6 +248,10 @@ public class MainActivity extends AppCompatActivity {
             return username;
     }
 
+    /**
+     * Returns the password from the Settings, or opens Settings if it missing
+     * @return Password
+     */
     @Nullable
     private String retrievePassword() {
         String password = myPreference.getString("password", "");
