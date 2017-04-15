@@ -8,7 +8,7 @@
     <EditTextPreference android:title="Address"
         android:summary="Address to access on Amazon server"
         android:key="address"
-        android:defaultValue="ec2-34-201-19-233.compute-1.amazonaws.com"
+        android:defaultValue="@string/amazon_address"
         android:id="@+id/address" />
 
     <EditTextPreference android:title="Port"

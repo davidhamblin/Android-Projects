@@ -5,4 +5,5 @@
     <string name="default_text">Online Text to Show</string>
     <string name="push_string">PUSH</string>
     <string name="pull_string">PULL</string>
+    <string name="amazon_address">ec2-54-147-181-10.compute-1.amazonaws.com</string>
 </resources>
